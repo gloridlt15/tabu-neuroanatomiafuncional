@@ -420,6 +420,7 @@ const G = {
   round: 1,
   turnScore: 0,
   gamePhase: 'idle',    // idle | playing | ended
+  rolesSwapped: false,  // false = jugador es equipo A, juez es equipo B; true = invertido
 };
 
 const PIN = '1234';
@@ -532,6 +533,7 @@ function publish() {
       scores: [G.teams[0].score, G.teams[1].score],
       names: [G.teams[0].name, G.teams[1].name],
       currentTeam: G.currentTeam,
+      rolesSwapped: G.rolesSwapped,
       ts: Date.now(),
     });
   } catch(e) { console.warn('publish failed', e); }
@@ -706,6 +708,7 @@ function finalizarTurno() {
   clearInterval(G.timerInterval); G.running = false;
   G.currentTeam = G.currentTeam === 0 ? 1 : 0;
   G.gamePhase = 'idle';
+  G.rolesSwapped = !G.rolesSwapped;  // invertir roles
   publish();
 }
 
@@ -845,7 +848,7 @@ function confetti() {
 // =============================================
 function initMobile(rol) {
   showScreen('screen-movil');
-  const esJuez = rol === 'juez';
+  let esJuez = rol === 'juez';
 
   // Header según rol
   document.getElementById('movil-hdr').className = `movil-hdr ${esJuez?'juez':'jugador'}`;
@@ -869,8 +872,33 @@ function initMobile(rol) {
 
   let lastCardIdx = -2;
 
+  let lastRolesSwapped = null;
+
   function applyGameState(d) {
     if (!d) return;
+
+    // Detectar cambio de roles
+    if (lastRolesSwapped !== null && d.rolesSwapped !== lastRolesSwapped) {
+      // Los roles se invirtieron — cambiar rol actual
+      const nuevoRol = esJuez ? 'jugador' : 'juez';
+      esJuez = !esJuez;
+
+      // Actualizar UI del header
+      document.getElementById('movil-hdr').className = `movil-hdr ${esJuez ? 'juez' : 'jugador'}`;
+      document.getElementById('movil-title').textContent = esJuez ? '⚖️ Vista Juez' : '🗣️ Tu carta';
+      document.getElementById('movil-footer').textContent = esJuez
+        ? 'Controlá que no digan palabras prohibidas'
+        : '¡Describí sin decir las palabras de la carta!';
+
+      // Mostrar/ocultar botones juez
+      const actions = document.getElementById('movil-actions');
+      if (esJuez) actions.classList.add('visible');
+      else actions.classList.remove('visible');
+
+      toast(`🔄 Ahora sos ${esJuez ? 'Juez' : 'Jugador'}`, 'info');
+    }
+    lastRolesSwapped = d.rolesSwapped;
+
     // Timer
     const elapsed = (Date.now() - d.ts) / 1000;
     const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
