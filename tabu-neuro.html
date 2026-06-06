@@ -428,16 +428,42 @@ const PIN = '1234';
 // Firebase REST API (sin SDK externo)
 // =============================================
 const FB_URL = "https://tabu-neuro-default-rtdb.firebaseio.com";
-const FB_KEY = "AIzaSyA79R3QxGiBIfXO45-qYI_IFQV1gMyA2iI";
+// (FB_KEY not needed in test mode)
 
 // Objeto que imita la interfaz de Firebase SDK usando REST + SSE
 const refGame = makeRef('game');
 const refAction = makeRef('action');
 
 function makeRef(path) {
-  const url = `${FB_URL}/${path}.json?auth=${FB_KEY}`;
-  const listeners = [];
+  const url = `${FB_URL}/${path}.json`;
   let es = null;
+  let onCb = null;
+
+  // Polling cada 500ms como mecanismo principal (SSE puede fallar en móviles)
+  let pollInterval = null;
+  let lastData = undefined;
+
+  function startPolling(cb) {
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(() => {
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          // Solo llamar callback si los datos cambiaron
+          const str = JSON.stringify(data);
+          if (str !== lastData) {
+            lastData = str;
+            cb({ val: () => data });
+          }
+        })
+        .catch(() => {});
+    }, 500);
+    // Lectura inmediata
+    fetch(url).then(r => r.json()).then(data => {
+      lastData = JSON.stringify(data);
+      cb({ val: () => data });
+    }).catch(() => {});
+  }
 
   return {
     set(data) {
@@ -451,31 +477,17 @@ function makeRef(path) {
       return fetch(url, { method: 'DELETE' })
         .catch(e => console.warn('FB remove error', e));
     },
-    once(evt) {
+    once() {
       return fetch(url).then(r => r.json()).then(data => ({ val: () => data }));
     },
     on(evt, cb) {
-      // Server-Sent Events para tiempo real
-      const sseUrl = `${FB_URL}/${path}.json?auth=${FB_KEY}`;
-      es = new EventSource(sseUrl);
-      es.addEventListener('put', e => {
-        try {
-          const msg = JSON.parse(e.data);
-          cb({ val: () => msg.data });
-        } catch(err) {}
-      });
-      es.addEventListener('patch', e => {
-        try {
-          const msg = JSON.parse(e.data);
-          cb({ val: () => msg.data });
-        } catch(err) {}
-      });
-      es.onerror = () => {
-        // Reconectar en caso de error
-        setTimeout(() => { if(es) { es.close(); this.on(evt, cb); } }, 2000);
-      };
+      onCb = cb;
+      startPolling(cb);
     },
-    off() { if(es) { es.close(); es = null; } }
+    off() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = null;
+    }
   };
 }
 
