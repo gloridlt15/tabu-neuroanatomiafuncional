@@ -9,492 +9,503 @@
 :root {
   --azul:#1a1f5e; --azul-med:#2d35a8; --azul-claro:#4f5fe8;
   --acento:#f7c948; --rojo:#e84f4f; --verde:#2ecc71; --bg:#0e1240;
+  --col-a:#2460b8; --col-b:#b82424;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Nunito',sans-serif; background:var(--bg); min-height:100vh; }
-body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at 20% 50%,rgba(77,95,232,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(247,201,72,.08) 0%,transparent 50%); pointer-events:none; z-index:0; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(77,95,232,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(247,201,72,.08) 0%,transparent 50%);pointer-events:none;z-index:0;}
+.screen{display:none;min-height:100vh;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;}
 
-.screen { display:none; min-height:100vh; position:relative; z-index:1; }
-.screen.active { display:flex; flex-direction:column; }
+/* ===== CENTRADO ===== */
+.center-screen{align-items:center;justify-content:center;padding:2rem;gap:1.5rem;text-align:center;}
 
-/* ===== BIENVENIDA ===== */
-#screen-bienvenida { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
-.logo-title { font-family:'Righteous',cursive; font-size:clamp(3rem,10vw,5.5rem); color:var(--acento); text-shadow:0 4px 20px rgba(247,201,72,.4); line-height:1; }
-.logo-sub { font-size:1rem; color:rgba(255,255,255,.6); font-weight:700; letter-spacing:.3em; text-transform:uppercase; margin-top:.3rem; }
-.brain-icon { font-size:4rem; animation:pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+/* ===== LOGO ===== */
+.logo-title{font-family:'Righteous',cursive;font-size:clamp(2.5rem,8vw,5rem);color:var(--acento);text-shadow:0 4px 20px rgba(247,201,72,.4);line-height:1;}
+.logo-sub{font-size:.95rem;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.3em;text-transform:uppercase;margin-top:.3rem;}
+.brain{font-size:3.5rem;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 
-.role-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:1.8rem; width:100%; max-width:380px; backdrop-filter:blur(10px); }
-.role-card h2 { color:white; font-size:1.1rem; margin-bottom:1.2rem; font-weight:800; }
-.btn-role { display:flex; align-items:center; gap:.9rem; padding:.9rem 1.1rem; border-radius:14px; border:1.5px solid rgba(255,255,255,.1); background:rgba(255,255,255,.05); color:white; font-family:'Nunito',sans-serif; cursor:pointer; transition:all .2s; width:100%; margin-bottom:.7rem; }
-.btn-role:last-child { margin-bottom:0; }
-.btn-role:hover { transform:translateY(-2px); border-color:var(--acento); background:rgba(247,201,72,.08); }
-.btn-role .role-icon { font-size:1.6rem; }
-.btn-role .role-info { text-align:left; }
-.btn-role .role-name { font-size:1rem; font-weight:800; display:block; }
-.btn-role .role-desc { font-size:.75rem; color:rgba(255,255,255,.5); font-weight:600; }
+/* ===== CARDS ===== */
+.glass-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:1.8rem;backdrop-filter:blur(10px);}
+.card-title{color:white;font-size:1rem;font-weight:800;margin-bottom:1.2rem;}
 
-/* ===== PIN ===== */
-#screen-pin { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
-.pin-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:2rem; width:100%; max-width:320px; }
-.pin-card h2 { color:white; font-size:1.1rem; margin-bottom:1.2rem; font-weight:800; }
-.pin-input { text-align:center; font-size:2rem; letter-spacing:.5em; padding:.7rem; width:100%; border-radius:12px; border:2px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:white; font-family:'Nunito',sans-serif; outline:none; margin-bottom:.8rem; }
-.pin-input:focus { border-color:var(--acento); }
-.pin-error { color:var(--rojo); font-size:.85rem; font-weight:700; margin-bottom:.8rem; display:none; }
+/* ===== BOTONES ===== */
+.btn{padding:.85rem 1.2rem;border-radius:14px;border:none;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;width:100%;}
+.btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:linear-gradient(135deg,var(--azul-claro),#7b5cf0);color:white;box-shadow:0 4px 20px rgba(79,95,232,.3);}
+.btn-green{background:linear-gradient(135deg,#27ae60,#2ecc71);color:white;}
+.btn-red{background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;}
+.btn-purple{background:linear-gradient(135deg,#8e44ad,#9b59b6);color:white;}
+.btn-gray{background:linear-gradient(135deg,#546e7a,#78909c);color:white;}
+.btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);}
+.btn-ghost:hover{border-color:var(--acento);color:var(--acento);}
+.btn-sm{padding:.55rem .9rem;font-size:.85rem;border-radius:10px;width:auto;}
+.btn-back{background:transparent;border:none;color:rgba(255,255,255,.4);font-family:'Nunito',sans-serif;font-size:.85rem;cursor:pointer;margin-top:.5rem;width:100%;padding:.4rem;}
 
-/* ===== SETUP (coordinador) ===== */
-#screen-setup { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
-.setup-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:2rem; width:100%; max-width:480px; }
-.setup-card h2 { color:white; font-size:1.1rem; margin-bottom:1.5rem; font-weight:800; }
-.upload-zone { border:2px dashed rgba(79,95,232,.6); border-radius:16px; padding:1.5rem; cursor:pointer; transition:all .3s; background:rgba(79,95,232,.05); margin-bottom:1rem; }
-.upload-zone:hover { border-color:var(--acento); background:rgba(247,201,72,.08); }
-.upload-zone input { display:none; }
-.upload-icon { font-size:2rem; margin-bottom:.3rem; }
-.upload-text { color:rgba(255,255,255,.7); font-size:.85rem; line-height:1.5; }
-.upload-text strong { color:var(--acento); }
-.cards-ok { background:rgba(46,204,113,.15); border:1px solid rgba(46,204,113,.3); border-radius:10px; padding:.5rem 1rem; color:#2ecc71; font-weight:700; font-size:.85rem; margin-bottom:1rem; text-align:center; }
-.field-label { color:rgba(255,255,255,.5); font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.4rem; }
-.timer-select { display:flex; gap:.5rem; margin-bottom:1rem; }
-.timer-btn { flex:1; padding:.55rem; border:2px solid rgba(255,255,255,.15); border-radius:10px; background:transparent; color:rgba(255,255,255,.5); font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; transition:all .2s; }
-.timer-btn.active { border-color:var(--acento); color:var(--acento); background:rgba(247,201,72,.1); }
-.team-names { display:flex; gap:.8rem; margin-bottom:1.2rem; }
-.team-wrap { flex:1; display:flex; flex-direction:column; gap:.3rem; }
-.team-wrap label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; }
-.team-wrap:first-child label { color:#4f9ef0; }
-.team-wrap:last-child label { color:#f07a4f; }
-.team-wrap input { padding:.55rem .7rem; border-radius:10px; border:1.5px solid rgba(255,255,255,.12); background:rgba(255,255,255,.07); color:white; font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:700; outline:none; transition:border .2s; }
-.team-wrap input:focus { border-color:var(--acento); }
+/* ===== INPUTS ===== */
+.field-label{color:rgba(255,255,255,.5);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;display:block;}
+.input{padding:.6rem .9rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:white;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;outline:none;transition:border .2s;width:100%;}
+.input:focus{border-color:var(--acento);}
+.input-pin{text-align:center;font-size:2rem;letter-spacing:.5em;}
 
-/* ===== BOTONES GENERALES ===== */
-.btn-primary { width:100%; padding:.9rem; border-radius:14px; border:none; background:linear-gradient(135deg,var(--azul-claro),#7b5cf0); color:white; font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:800; cursor:pointer; transition:all .3s; box-shadow:0 4px 20px rgba(79,95,232,.4); }
-.btn-primary:hover:not(:disabled) { transform:translateY(-2px); }
-.btn-primary:disabled { opacity:.4; cursor:not-allowed; }
-.btn-back { background:transparent; border:none; color:rgba(255,255,255,.4); font-family:'Nunito',sans-serif; font-size:.85rem; cursor:pointer; margin-top:.5rem; width:100%; padding:.5rem; }
+/* ===== ROLE BUTTONS ===== */
+.btn-role{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.1rem;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:white;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .2s;width:100%;margin-bottom:.7rem;}
+.btn-role:last-child{margin-bottom:0;}
+.btn-role:hover{transform:translateY(-2px);border-color:var(--acento);background:rgba(247,201,72,.08);}
+.btn-role .ri{font-size:1.6rem;}
+.btn-role .rn{font-size:1rem;font-weight:800;display:block;text-align:left;}
+.btn-role .rd{font-size:.75rem;color:rgba(255,255,255,.5);font-weight:600;display:block;text-align:left;}
 
-/* ===== JUEGO - COORDINADOR ===== */
-#screen-juego { flex-direction:row; overflow:hidden; height:100vh; }
-.panel-publico { width:40%; background:linear-gradient(160deg,#0a0f35,#121852); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; border-right:1px solid rgba(255,255,255,.06); gap:1.2rem; position:relative; }
-.panel-publico::before { content:'📺 PANTALLA COMPARTIDA'; position:absolute; top:.7rem; left:50%; transform:translateX(-50%); font-size:.6rem; font-weight:800; letter-spacing:.15em; color:rgba(255,255,255,.2); white-space:nowrap; }
-.panel-coord { width:60%; background:#f8f9ff; display:flex; flex-direction:column; overflow-y:auto; }
+/* ===== EQUIPOS ===== */
+.equipos-wrap{display:flex;gap:1rem;width:100%;max-width:600px;}
+.equipo-panel{flex:1;border-radius:20px;padding:1.2rem;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);}
+.equipo-panel.azul{border-color:rgba(36,96,184,.5);background:rgba(26,74,143,.15);}
+.equipo-panel.rojo{border-color:rgba(184,36,36,.5);background:rgba(143,26,26,.15);}
+.equipo-title{font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem;}
+.equipo-panel.azul .equipo-title{color:#6aacff;}
+.equipo-panel.rojo .equipo-title{color:#ff7a7a;}
+.jugador-chip{display:flex;align-items:center;gap:.5rem;padding:.4rem .7rem;border-radius:8px;background:rgba(255,255,255,.08);margin-bottom:.4rem;font-size:.85rem;font-weight:700;color:white;}
+.jugador-chip .chip-icon{font-size:1rem;}
+.jugador-chip.elegido{background:rgba(247,201,72,.2);border:1px solid rgba(247,201,72,.4);}
+.jugador-chip.jugando-j{background:rgba(36,96,184,.3);border:1px solid rgba(36,96,184,.5);}
+.jugador-chip.jugando-juez{background:rgba(142,68,173,.3);border:1px solid rgba(142,68,173,.5);}
+.jugador-chip.ya-jugo{opacity:.4;}
+.equipo-vacio{color:rgba(255,255,255,.3);font-size:.8rem;font-weight:600;font-style:italic;padding:.4rem 0;}
 
-/* Marcador */
-.scoreboard { display:flex; gap:.8rem; width:100%; }
-.score-team { flex:1; border-radius:14px; padding:.7rem .5rem; text-align:center; transition:all .4s; position:relative; overflow:hidden; }
-.score-team.team-a { background:linear-gradient(135deg,#1a4a8f,#2460b8); border:2px solid transparent; }
-.score-team.team-b { background:linear-gradient(135deg,#8f1a1a,#b82424); border:2px solid transparent; }
-.score-team.active { border-color:var(--acento); box-shadow:0 0 20px rgba(247,201,72,.3); }
-.score-team.active::after { content:'▶ TURNO'; position:absolute; bottom:.25rem; left:50%; transform:translateX(-50%); font-size:.5rem; font-weight:800; letter-spacing:.15em; color:var(--acento); }
-.score-name { font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.7); margin-bottom:.2rem; }
-.score-pts { font-family:'Righteous',cursive; font-size:2.6rem; color:white; line-height:1; }
+/* ===== TIMER ===== */
+.timer-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
+.timer-svg{width:140px;height:140px;}
+.timer-svg circle{fill:none;stroke-width:8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1s linear,stroke .5s;}
+.timer-bg{stroke:rgba(255,255,255,.08);}
+.timer-fg{stroke:var(--verde);stroke-dasharray:440;stroke-dashoffset:0;}
+.timer-num{position:absolute;font-family:'Righteous',cursive;font-size:2.5rem;color:white;}
+.timer-num.urgent{color:var(--rojo);animation:blink .5s infinite;}
+@keyframes blink{50%{opacity:.5;}}
 
-/* Timer */
-.timer-public { position:relative; display:flex; align-items:center; justify-content:center; }
-.timer-ring { width:150px; height:150px; }
-.timer-ring circle { fill:none; stroke-width:8; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dashoffset 1s linear, stroke .5s; }
-.timer-ring .bg-ring { stroke:rgba(255,255,255,.08); }
-.timer-ring .fg-ring { stroke:var(--verde); stroke-dasharray:440; stroke-dashoffset:0; }
-.timer-number { position:absolute; font-family:'Righteous',cursive; font-size:2.8rem; color:white; }
-.timer-number.urgent { color:var(--rojo); animation:blink .5s infinite; }
-@keyframes blink { 50%{opacity:.5;} }
-.round-info { text-align:center; color:rgba(255,255,255,.5); font-size:.75rem; font-weight:600; letter-spacing:.1em; }
-.round-info span { color:var(--acento); font-weight:800; }
-.status-badge { padding:.5rem 1.2rem; border-radius:50px; font-size:.9rem; font-weight:800; }
-.status-badge.playing { background:rgba(46,204,113,.2); color:#2ecc71; border:1.5px solid rgba(46,204,113,.4); }
-.status-badge.waiting { background:rgba(247,201,72,.15); color:var(--acento); border:1.5px solid rgba(247,201,72,.3); }
-.status-badge.ended { background:rgba(232,79,79,.15); color:var(--rojo); border:1.5px solid rgba(232,79,79,.4); }
+/* ===== SCOREBOARD ===== */
+.scoreboard{display:flex;gap:.8rem;width:100%;}
+.score-box{flex:1;border-radius:14px;padding:.7rem .5rem;text-align:center;position:relative;overflow:hidden;transition:all .4s;}
+.score-box.azul{background:linear-gradient(135deg,#1a4a8f,#2460b8);border:2px solid transparent;}
+.score-box.rojo{background:linear-gradient(135deg,#8f1a1a,#b82424);border:2px solid transparent;}
+.score-box.activo{border-color:var(--acento);box-shadow:0 0 20px rgba(247,201,72,.3);}
+.score-box.activo::after{content:'▶ TURNO';position:absolute;bottom:.25rem;left:50%;transform:translateX(-50%);font-size:.5rem;font-weight:800;letter-spacing:.15em;color:var(--acento);}
+.score-name{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.7);margin-bottom:.2rem;}
+.score-pts{font-family:'Righteous',cursive;font-size:2.4rem;color:white;line-height:1;}
+.score-pop{animation:spop .5s ease both;}
+@keyframes spop{0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);}}
 
-/* Panel coord */
-.coord-header { background:linear-gradient(135deg,var(--azul),var(--azul-med)); padding:.7rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
-.coord-header h3 { color:white; font-size:.8rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
-.badge-priv { background:var(--acento); color:var(--azul); padding:.2rem .6rem; border-radius:50px; font-size:.65rem; font-weight:800; }
-.card-area { flex:1; display:flex; flex-direction:column; align-items:center; padding:1.2rem; gap:1rem; }
-.card-wrap { width:100%; max-width:340px; border-radius:18px; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.3); background:#e8eaf8; aspect-ratio:1; }
-.card-wrap img { width:100%; height:100%; object-fit:contain; display:block; }
-.card-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; color:#8890cc; font-size:.9rem; font-weight:600; text-align:center; padding:1.5rem; }
-.card-counter { font-size:.75rem; color:#8890cc; font-weight:700; }
+/* ===== STATUS ===== */
+.status-badge{padding:.45rem 1.1rem;border-radius:50px;font-size:.85rem;font-weight:800;}
+.status-badge.playing{background:rgba(46,204,113,.2);color:#2ecc71;border:1.5px solid rgba(46,204,113,.4);}
+.status-badge.waiting{background:rgba(247,201,72,.15);color:var(--acento);border:1.5px solid rgba(247,201,72,.3);}
+.status-badge.ended{background:rgba(232,79,79,.15);color:var(--rojo);border:1.5px solid rgba(232,79,79,.4);}
 
-/* Controles */
-.controls { padding:.8rem 1.2rem 1.2rem; display:flex; flex-direction:column; gap:.7rem; background:white; border-top:1px solid #eef0fb; }
-.controls-row { display:flex; gap:.7rem; }
-.btn-ctrl { flex:1; padding:.8rem; border-radius:12px; border:none; font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:800; cursor:pointer; transition:all .2s; }
-.btn-ctrl:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
-.btn-ctrl:disabled { opacity:.4; cursor:not-allowed; }
-.btn-correcto { background:linear-gradient(135deg,#27ae60,#2ecc71); color:white; }
-.btn-tabu { background:linear-gradient(135deg,#c0392b,#e74c3c); color:white; }
-.btn-iniciar { background:linear-gradient(135deg,var(--azul-claro),#7b5cf0); color:white; box-shadow:0 4px 15px rgba(79,95,232,.3); width:100%; padding:.95rem; font-size:1.05rem; }
-.btn-pausa { background:linear-gradient(135deg,#546e7a,#78909c); color:white; }
-.btn-cambio { background:linear-gradient(135deg,#8e44ad,#9b59b6); color:white; width:100%; padding:.85rem; }
-.btn-menu { background:linear-gradient(135deg,#c0392b,#e74c3c); color:white; font-size:.8rem; padding:.55rem; }
+/* ===== PANEL COORDINADOR ===== */
+#screen-juego{flex-direction:row;overflow:hidden;height:100vh;}
+.panel-pub{width:38%;background:linear-gradient(160deg,#0a0f35,#121852);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.2rem;border-right:1px solid rgba(255,255,255,.06);gap:1rem;position:relative;}
+.panel-pub::before{content:'📺 PANTALLA COMPARTIDA';position:absolute;top:.6rem;left:50%;transform:translateX(-50%);font-size:.58rem;font-weight:800;letter-spacing:.15em;color:rgba(255,255,255,.2);white-space:nowrap;}
+.panel-coord{width:62%;background:#f8f9ff;display:flex;flex-direction:column;overflow-y:auto;}
+.coord-hdr{background:linear-gradient(135deg,var(--azul),var(--azul-med));padding:.65rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.coord-hdr h3{color:white;font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+.badge-priv{background:var(--acento);color:var(--azul);padding:.18rem .55rem;border-radius:50px;font-size:.62rem;font-weight:800;}
+.coord-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:1rem;gap:.8rem;}
+.card-wrap{width:100%;max-width:300px;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.25);background:#e8eaf8;aspect-ratio:1;}
+.card-wrap img{width:100%;height:100%;object-fit:contain;display:block;}
+.card-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;color:#8890cc;font-size:.85rem;font-weight:600;text-align:center;padding:1rem;}
+.card-counter{font-size:.7rem;color:#8890cc;font-weight:700;}
 
-/* ===== VISTA MÓVIL (jugador/juez) ===== */
-#screen-movil { align-items:center; justify-content:center; padding:1.5rem; min-height:100vh; }
-.movil-wrap { width:100%; max-width:400px; border-radius:24px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.5); }
-.movil-hdr { padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
-.movil-hdr.jugador { background:linear-gradient(135deg,#1a4a8f,#2460b8); }
-.movil-hdr.juez { background:linear-gradient(135deg,#6d1a8f,#9b2fb8); }
-.movil-hdr h2 { color:white; font-family:'Righteous',cursive; font-size:1.2rem; }
-.movil-timer { background:var(--acento); color:var(--azul); padding:.3rem .8rem; border-radius:50px; font-family:'Righteous',cursive; font-size:1.2rem; font-weight:700; }
-.movil-timer.urgent { background:var(--rojo); color:white; animation:blink .5s infinite; }
-.movil-progress { height:5px; background:#e8eaf8; }
-.movil-bar { height:100%; background:linear-gradient(90deg,var(--verde),var(--acento)); transition:width 1s linear; }
-.movil-bar.urgent { background:var(--rojo); }
-.movil-img { width:100%; aspect-ratio:1; background:#f0f1f8; object-fit:contain; display:block; }
-.movil-waiting { width:100%; aspect-ratio:1; background:#f0f1f8; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; color:#8890cc; font-weight:600; font-size:.9rem; text-align:center; padding:2rem; }
-.movil-waiting .w-icon { font-size:3rem; }
-.movil-actions { display:none; padding:1rem; gap:.8rem; background:white; }
-.movil-actions.visible { display:flex; }
-.btn-movil { flex:1; padding:.9rem; border-radius:12px; border:none; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:800; cursor:pointer; transition:all .2s; }
-.btn-movil:active { transform:scale(.97); }
-.btn-movil:disabled { opacity:.4; }
-.btn-mcorrecto { background:linear-gradient(135deg,#27ae60,#2ecc71); color:white; }
-.btn-mtabu { background:linear-gradient(135deg,#c0392b,#e74c3c); color:white; }
-.movil-footer { padding:.7rem 1rem; text-align:center; font-size:.75rem; color:#8890cc; font-weight:600; background:white; }
+/* Jugadores activos en coord */
+.activos-wrap{display:flex;gap:.6rem;width:100%;max-width:340px;}
+.activo-box{flex:1;border-radius:12px;padding:.6rem .8rem;text-align:center;}
+.activo-box.jugador-box{background:rgba(26,74,143,.15);border:1.5px solid rgba(36,96,184,.4);}
+.activo-box.juez-box{background:rgba(142,68,173,.15);border:1.5px solid rgba(142,68,173,.4);}
+.activo-label{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(0,0,0,.4);margin-bottom:.2rem;}
+.activo-name{font-size:.85rem;font-weight:800;color:var(--azul);}
 
-/* ===== ESPECTADOR ===== */
-#screen-espectador { flex-direction:column; align-items:center; justify-content:center; padding:2rem; gap:1.5rem; background:linear-gradient(160deg,#0a0f35,#121852); }
+.controls{padding:.7rem 1rem 1rem;display:flex;flex-direction:column;gap:.6rem;background:white;border-top:1px solid #eef0fb;flex-shrink:0;}
+.ctrl-row{display:flex;gap:.6rem;}
+.btn-ctrl{flex:1;padding:.75rem;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;transition:all .2s;}
+.btn-ctrl:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1);}
+.btn-ctrl:disabled{opacity:.4;cursor:not-allowed;}
+.btn-iniciar{background:linear-gradient(135deg,var(--azul-claro),#7b5cf0);color:white;width:100%;padding:.9rem;font-size:1rem;}
+.btn-correcto{background:linear-gradient(135deg,#27ae60,#2ecc71);color:white;}
+.btn-tabu{background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;}
+.btn-pausa{background:linear-gradient(135deg,#546e7a,#78909c);color:white;}
+.btn-cambio{background:linear-gradient(135deg,#8e44ad,#9b59b6);color:white;width:100%;padding:.85rem;}
+.btn-menu-sm{background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;font-size:.78rem;padding:.5rem;}
+.round-badge{font-size:.7rem;color:#8890cc;font-weight:700;text-align:center;}
 
-/* ===== ENTRETURNO ===== */
-#screen-entreturno { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
-.et-card { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:24px; padding:2rem; max-width:440px; width:100%; }
-.et-icon { font-size:3.5rem; margin-bottom:.8rem; }
-.et-title { font-family:'Righteous',cursive; font-size:1.8rem; color:white; margin-bottom:.4rem; }
-.et-desc { color:rgba(255,255,255,.6); font-size:.95rem; margin-bottom:1.2rem; }
-.result-mini { display:flex; gap:.8rem; margin-bottom:1.2rem; }
-.rm-team { flex:1; border-radius:12px; padding:.8rem; text-align:center; }
-.rm-team.a { background:rgba(26,74,143,.4); border:1.5px solid rgba(70,120,220,.4); }
-.rm-team.b { background:rgba(143,26,26,.4); border:1.5px solid rgba(220,70,70,.4); }
-.rm-name { font-size:.7rem; font-weight:800; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.1em; }
-.rm-pts { font-family:'Righteous',cursive; font-size:2.2rem; color:white; }
+/* ===== MÓVIL ===== */
+#screen-movil{align-items:center;justify-content:center;padding:1.5rem;min-height:100vh;}
+.movil-card{width:100%;max-width:400px;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.movil-hdr{padding:.9rem 1.3rem;display:flex;align-items:center;justify-content:space-between;}
+.movil-hdr.jugador-hdr{background:linear-gradient(135deg,#1a4a8f,#2460b8);}
+.movil-hdr.juez-hdr{background:linear-gradient(135deg,#6d1a8f,#9b2fb8);}
+.movil-hdr h2{color:white;font-family:'Righteous',cursive;font-size:1.1rem;}
+.movil-hdr .player-name{color:rgba(255,255,255,.8);font-size:.75rem;font-weight:700;}
+.movil-timer{background:var(--acento);color:var(--azul);padding:.25rem .7rem;border-radius:50px;font-family:'Righteous',cursive;font-size:1.1rem;font-weight:700;}
+.movil-timer.urgent{background:var(--rojo);color:white;animation:blink .5s infinite;}
+.movil-prog{height:4px;background:#e8eaf8;}
+.movil-bar{height:100%;background:linear-gradient(90deg,var(--verde),var(--acento));transition:width 1s linear;}
+.movil-bar.urgent{background:var(--rojo);}
+.movil-img{width:100%;aspect-ratio:1;background:#f0f1f8;object-fit:contain;display:block;}
+.movil-wait{width:100%;aspect-ratio:1;background:#f0f1f8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;color:#8890cc;font-weight:600;font-size:.85rem;text-align:center;padding:1.5rem;}
+.movil-wait .wi{font-size:2.5rem;}
+.movil-actions{display:none;padding:.8rem;gap:.7rem;background:white;}
+.movil-actions.visible{display:flex;}
+.btn-mov{flex:1;padding:.85rem;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;}
+.btn-mov:active{transform:scale(.97);}
+.btn-mov:disabled{opacity:.4;}
+.btn-mov-ok{background:linear-gradient(135deg,#27ae60,#2ecc71);color:white;}
+.btn-mov-tabu{background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;}
+.movil-foot{padding:.6rem 1rem;text-align:center;font-size:.72rem;color:#8890cc;font-weight:600;background:white;}
+
+/* ===== LOBBY (ingreso jugadores) ===== */
+#screen-lobby{align-items:center;justify-content:center;padding:1.5rem;gap:1rem;}
+.lobby-join{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:1.5rem;width:100%;max-width:380px;}
+.lobby-join h2{color:white;font-size:1rem;font-weight:800;margin-bottom:1rem;}
+.equipo-btns{display:flex;gap:.7rem;margin-top:.8rem;}
+.btn-eq-a{background:linear-gradient(135deg,#1a4a8f,#2460b8);color:white;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;padding:.7rem;border-radius:12px;border:none;flex:1;cursor:pointer;transition:all .2s;}
+.btn-eq-b{background:linear-gradient(135deg,#8f1a1a,#b82424);color:white;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;padding:.7rem;border-radius:12px;border:none;flex:1;cursor:pointer;transition:all .2s;}
+.btn-eq-a:hover,.btn-eq-b:hover{transform:translateY(-2px);}
+
+/* ===== ESPERA LOBBY ===== */
+#screen-espera{align-items:center;justify-content:center;padding:1.5rem;gap:1.2rem;text-align:center;}
+.espera-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:2rem;width:100%;max-width:400px;}
+.espera-nombre{font-family:'Righteous',cursive;font-size:1.8rem;color:var(--acento);margin-bottom:.3rem;}
+.espera-equipo{font-size:.85rem;font-weight:700;padding:.3rem .9rem;border-radius:50px;display:inline-block;margin-bottom:1rem;}
+.espera-equipo.a{background:rgba(26,74,143,.4);color:#6aacff;}
+.espera-equipo.b{background:rgba(143,26,26,.4);color:#ff7a7a;}
+.espera-desc{color:rgba(255,255,255,.5);font-size:.85rem;margin-bottom:1.2rem;}
+.waiting-dots{font-size:1.5rem;animation:pulse 1s infinite;}
+
+/* ===== RESULTADO RONDA ===== */
+#screen-resultado{align-items:center;justify-content:center;padding:2rem;gap:1.2rem;text-align:center;overflow-y:auto;}
+.resultado-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:2rem;max-width:480px;width:100%;}
+.resultado-icon{font-size:3rem;margin-bottom:.6rem;}
+.resultado-title{font-family:'Righteous',cursive;font-size:1.8rem;color:white;margin-bottom:.3rem;}
+.resultado-sub{color:rgba(255,255,255,.5);font-size:.85rem;margin-bottom:1.2rem;}
+.rm-scores{display:flex;gap:.8rem;margin-bottom:1.2rem;}
+.rm-box{flex:1;border-radius:12px;padding:.8rem;text-align:center;}
+.rm-box.a{background:rgba(26,74,143,.4);border:1.5px solid rgba(70,120,220,.4);}
+.rm-box.b{background:rgba(143,26,26,.4);border:1.5px solid rgba(220,70,70,.4);}
+.rm-name{font-size:.65rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.1em;}
+.rm-pts{font-family:'Righteous',cursive;font-size:2rem;color:white;}
+.par-jugado{font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1.2rem;}
 
 /* ===== FINAL ===== */
-#screen-final { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; overflow-y:auto; }
-.trophy { font-size:5rem; animation:bounce 1s ease-in-out infinite; }
-@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-15px);} }
-.final-title { font-family:'Righteous',cursive; font-size:clamp(2rem,6vw,3.5rem); color:var(--acento); }
-.final-winner { color:white; font-size:1.2rem; font-weight:700; }
-.final-scores { display:flex; gap:1.2rem; flex-wrap:wrap; justify-content:center; }
-.fs-card { border-radius:20px; padding:1.5rem 2rem; min-width:160px; text-align:center; }
-.fs-card.winner { background:linear-gradient(135deg,#b8860b,var(--acento)); color:var(--azul); }
-.fs-card.loser { background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.15); color:white; }
-.fs-name { font-size:.85rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.4rem; }
-.fs-pts { font-family:'Righteous',cursive; font-size:3.5rem; line-height:1; }
+#screen-final{align-items:center;justify-content:center;padding:2rem;gap:1.2rem;text-align:center;overflow-y:auto;}
+.trophy{font-size:5rem;animation:bounce 1s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-15px);}}
+.final-title{font-family:'Righteous',cursive;font-size:clamp(2rem,6vw,3.5rem);color:var(--acento);}
+.final-winner{color:white;font-size:1.1rem;font-weight:700;}
+.final-scores{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;}
+.fs-card{border-radius:20px;padding:1.5rem 2rem;min-width:150px;text-align:center;}
+.fs-card.winner{background:linear-gradient(135deg,#b8860b,var(--acento));color:var(--azul);}
+.fs-card.loser{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:white;}
+.fs-name{font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;}
+.fs-pts{font-family:'Righteous',cursive;font-size:3rem;line-height:1;}
+
+/* ===== SETUP ===== */
+.setup-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:1.8rem;width:100%;max-width:460px;}
+.timer-sel{display:flex;gap:.5rem;margin-bottom:1rem;}
+.timer-btn{flex:1;padding:.55rem;border:2px solid rgba(255,255,255,.15);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.timer-btn.active{border-color:var(--acento);color:var(--acento);background:rgba(247,201,72,.1);}
+.upload-zone{border:2px dashed rgba(79,95,232,.6);border-radius:14px;padding:1.2rem;cursor:pointer;transition:all .3s;background:rgba(79,95,232,.05);margin-bottom:.8rem;text-align:center;}
+.upload-zone:hover{border-color:var(--acento);background:rgba(247,201,72,.06);}
+.upload-zone input{display:none;}
 
 /* ===== TOASTS ===== */
-#toasts { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:.5rem; pointer-events:none; }
-.toast { padding:.7rem 1.4rem; border-radius:50px; font-weight:800; font-size:.9rem; color:white; text-align:center; animation:tin .3s ease both, tout .3s 1.7s ease both; white-space:nowrap; }
-.toast.ok { background:linear-gradient(135deg,#27ae60,#2ecc71); }
-.toast.err { background:linear-gradient(135deg,#c0392b,#e74c3c); }
-.toast.info { background:linear-gradient(135deg,var(--azul-med),var(--azul-claro)); }
-@keyframes tin { from{opacity:0;transform:translateY(20px) scale(.9);} to{opacity:1;transform:translateY(0) scale(1);} }
-@keyframes tout { from{opacity:1;} to{opacity:0;transform:translateY(-10px);} }
-.score-pop { animation:spop .5s ease both; }
-@keyframes spop { 0%{transform:scale(1);} 50%{transform:scale(1.3);} 100%{transform:scale(1);} }
+#toasts{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:.4rem;pointer-events:none;}
+.toast{padding:.6rem 1.2rem;border-radius:50px;font-weight:800;font-size:.88rem;color:white;text-align:center;animation:tin .3s ease both,tout .3s 1.7s ease both;white-space:nowrap;}
+.toast.ok{background:linear-gradient(135deg,#27ae60,#2ecc71);}
+.toast.err{background:linear-gradient(135deg,#c0392b,#e74c3c);}
+.toast.info{background:linear-gradient(135deg,var(--azul-med),var(--azul-claro));}
+@keyframes tin{from{opacity:0;transform:translateY(20px) scale(.9);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes tout{from{opacity:1;}to{opacity:0;transform:translateY(-10px);}}
 
 /* Confetti */
-.confetti-area { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
-.cp { position:absolute; width:8px; height:8px; border-radius:2px; animation:cfall linear forwards; }
-@keyframes cfall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1;} 100%{transform:translateY(110vh) rotate(720deg);opacity:0;} }
+.confetti-area{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.cp{position:absolute;width:8px;height:8px;border-radius:2px;animation:cfall linear forwards;}
+@keyframes cfall{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
 
-/* Pausa overlay */
-#overlay-pausa { display:none; position:fixed; inset:0; background:rgba(10,15,53,.92); z-index:100; align-items:center; justify-content:center; flex-direction:column; gap:2rem; backdrop-filter:blur(8px); }
-#overlay-pausa.on { display:flex; }
-#overlay-pausa h2 { font-family:'Righteous',cursive; font-size:3rem; color:var(--acento); }
+/* Pausa */
+#overlay-pausa{display:none;position:fixed;inset:0;background:rgba(10,15,53,.92);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:2rem;backdrop-filter:blur(8px);}
+#overlay-pausa.on{display:flex;}
+#overlay-pausa h2{font-family:'Righteous',cursive;font-size:3rem;color:var(--acento);}
 
-@media(max-width:768px) {
-  #screen-juego { flex-direction:column; height:auto; overflow-y:auto; }
-  .panel-publico,.panel-coord { width:100%; }
+@media(max-width:768px){
+  #screen-juego{flex-direction:column;height:auto;overflow-y:auto;}
+  .panel-pub,.panel-coord{width:100%;}
+  .panel-pub{min-height:auto;padding:1rem;}
 }
 </style>
 </head>
 <body>
 
-<!-- BIENVENIDA -->
-<div id="screen-bienvenida" class="screen active">
-  <div><div class="brain-icon">🧠</div><div class="logo-title">TABÚ</div><div class="logo-sub">Neuroanatomía</div></div>
-  <div class="role-card">
-    <h2>👋 ¿Con qué rol entrás?</h2>
+<!-- ===== BIENVENIDA ===== -->
+<div id="screen-bienvenida" class="screen center-screen active">
+  <div><div class="brain">🧠</div><div class="logo-title">TABÚ</div><div class="logo-sub">Neuroanatomía</div></div>
+  <div class="glass-card" style="width:100%;max-width:360px">
+    <div class="card-title">👋 ¿Con qué rol entrás?</div>
     <button class="btn-role" onclick="elegirRol('coordinador')">
-      <span class="role-icon">🎮</span>
-      <span class="role-info"><span class="role-name">Coordinador</span><span class="role-desc">Configurá y manejá el juego</span></span>
+      <span class="ri">🎮</span><span><span class="rn">Coordinador</span><span class="rd">Configurá y manejá el juego</span></span>
     </button>
     <button class="btn-role" onclick="elegirRol('jugador')">
-      <span class="role-icon">🗣️</span>
-      <span class="role-info"><span class="role-name">Jugador</span><span class="role-desc">Describís la carta a tu equipo</span></span>
-    </button>
-    <button class="btn-role" onclick="elegirRol('juez')">
-      <span class="role-icon">⚖️</span>
-      <span class="role-info"><span class="role-name">Juez</span><span class="role-desc">Controlás las palabras prohibidas</span></span>
-    </button>
-    <button class="btn-role" onclick="elegirRol('espectador')">
-      <span class="role-icon">👥</span>
-      <span class="role-info"><span class="role-name">Espectador</span><span class="role-desc">Ves el puntaje y cronómetro</span></span>
+      <span class="ri">🙋</span><span><span class="rn">Jugador</span><span class="rd">Anotate en un equipo</span></span>
     </button>
   </div>
 </div>
 
-<!-- PIN -->
-<div id="screen-pin" class="screen">
-  <div><div class="brain-icon">🔐</div><div class="logo-title" style="font-size:3rem">PIN</div></div>
-  <div class="pin-card">
-    <h2>🔒 PIN del Coordinador</h2>
-    <input type="password" id="pin-input" class="pin-input" maxlength="4" placeholder="····">
-    <div id="pin-error" class="pin-error">❌ PIN incorrecto</div>
-    <button class="btn-primary" onclick="verificarPin()">Entrar</button>
+<!-- ===== PIN ===== -->
+<div id="screen-pin" class="screen center-screen">
+  <div><div class="brain">🔐</div><div class="logo-title" style="font-size:3rem">PIN</div></div>
+  <div class="glass-card" style="width:100%;max-width:300px">
+    <div class="card-title">🔒 PIN del Coordinador</div>
+    <input type="password" id="pin-input" class="input input-pin" maxlength="4" placeholder="····">
+    <div id="pin-err" style="color:var(--rojo);font-size:.82rem;font-weight:700;text-align:center;margin:.5rem 0;display:none">❌ PIN incorrecto</div>
+    <button class="btn btn-primary" onclick="verificarPin()" style="margin-top:.5rem">Entrar</button>
     <button class="btn-back" onclick="showScreen('screen-bienvenida')">← Volver</button>
   </div>
 </div>
 
-<!-- SETUP -->
-<div id="screen-setup" class="screen">
-  <div><div class="brain-icon">🧠</div><div class="logo-title">TABÚ</div></div>
+<!-- ===== SETUP ===== -->
+<div id="screen-setup" class="screen center-screen">
+  <div><div class="brain">🧠</div><div class="logo-title" style="font-size:3rem">TABÚ</div></div>
   <div class="setup-card">
-    <h2>⚙️ Configurar partida</h2>
+    <div class="card-title">⚙️ Configurar partida</div>
     <div class="upload-zone" id="upload-zone">
       <input type="file" id="file-input" accept="image/*" multiple>
-      <div class="upload-icon">🃏</div>
-      <div class="upload-text"><strong>Las 23 cartas ya están cargadas ✅</strong><br>O hacé clic para usar tus propias imágenes</div>
+      <div style="font-size:1.8rem">🃏</div>
+      <div style="color:rgba(255,255,255,.7);font-size:.85rem"><strong style="color:var(--acento)">Las 23 cartas ya están cargadas ✅</strong><br>O hacé clic para usar tus imágenes</div>
     </div>
-    <div class="cards-ok" id="cards-ok">✅ <span id="cards-num">23</span> cartas listas</div>
-    <div class="field-label">⏱ Tiempo por turno</div>
-    <div class="timer-select">
+    <label class="field-label">⏱ Tiempo por turno</label>
+    <div class="timer-sel">
       <button class="timer-btn" data-s="30">30s</button>
       <button class="timer-btn active" data-s="45">45s</button>
       <button class="timer-btn" data-s="60">60s</button>
     </div>
-    <div class="field-label">🏆 Nombres de equipos</div>
-    <div class="team-names">
-      <div class="team-wrap"><label>Equipo A</label><input type="text" id="nombre-a" placeholder="Azules" maxlength="12"></div>
-      <div class="team-wrap"><label>Equipo B</label><input type="text" id="nombre-b" placeholder="Rojos" maxlength="12"></div>
+    <label class="field-label">🏆 Nombre de equipos</label>
+    <div style="display:flex;gap:.8rem;margin-bottom:1.2rem">
+      <div style="flex:1"><input type="text" id="nombre-a" class="input" placeholder="Azules" maxlength="12" style="border-color:rgba(36,96,184,.5)"></div>
+      <div style="flex:1"><input type="text" id="nombre-b" class="input" placeholder="Rojos" maxlength="12" style="border-color:rgba(184,36,36,.5)"></div>
     </div>
-    <button class="btn-primary" id="btn-comenzar">🚀 ¡Comenzar juego!</button>
+    <button class="btn btn-primary" id="btn-ir-lobby">👥 Abrir sala de espera</button>
   </div>
 </div>
 
-<!-- JUEGO (coordinador) -->
+<!-- ===== LOBBY (coordinador ve jugadores) ===== -->
+<div id="screen-lobby-coord" class="screen center-screen">
+  <div><div class="logo-title" style="font-size:2.5rem">🧠 TABÚ</div><div class="logo-sub">Sala de espera</div></div>
+  <div class="equipos-wrap" id="lobby-equipos"></div>
+  <div style="color:rgba(255,255,255,.5);font-size:.82rem;font-weight:600">Los jugadores se unen desde sus celulares</div>
+  <button class="btn btn-primary" id="btn-iniciar-juego" disabled style="max-width:360px">🚀 Iniciar juego</button>
+  <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-setup')" style="max-width:200px">← Volver</button>
+</div>
+
+<!-- ===== LOBBY (jugador se anota) ===== -->
+<div id="screen-lobby" class="screen center-screen">
+  <div><div class="brain">🧠</div><div class="logo-title" style="font-size:2.5rem">TABÚ</div></div>
+  <div class="lobby-join glass-card">
+    <h2>✍️ Anotate para jugar</h2>
+    <label class="field-label">Tu nombre</label>
+    <input type="text" id="nombre-jugador" class="input" placeholder="Ej: María" maxlength="16" style="margin-bottom:.8rem">
+    <label class="field-label">Elegí tu equipo</label>
+    <div class="equipo-btns">
+      <button class="btn-eq-a" id="btn-unirse-a">🔵 <span id="label-eq-a">Azules</span></button>
+      <button class="btn-eq-b" id="btn-unirse-b">🔴 <span id="label-eq-b">Rojos</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ESPERA (jugador anotado espera) ===== -->
+<div id="screen-espera" class="screen center-screen">
+  <div class="espera-card glass-card">
+    <div class="waiting-dots">⏳</div>
+    <div class="espera-nombre" id="espera-nombre">Jugador</div>
+    <div class="espera-equipo" id="espera-equipo">Equipo</div>
+    <div class="espera-desc">Esperando que el coordinador inicie el juego...</div>
+    <div id="espera-turno-msg" style="display:none;color:var(--acento);font-weight:700;font-size:.9rem"></div>
+  </div>
+</div>
+
+<!-- ===== JUEGO ===== -->
 <div id="screen-juego" class="screen">
-  <div class="panel-publico">
+  <div class="panel-pub">
     <div class="confetti-area" id="confetti-area"></div>
     <div class="scoreboard">
-      <div class="score-team team-a" id="score-a"><div class="score-name" id="pub-nom-a">AZULES</div><div class="score-pts" id="pub-pts-a">0</div></div>
-      <div class="score-team team-b" id="score-b"><div class="score-name" id="pub-nom-b">ROJOS</div><div class="score-pts" id="pub-pts-b">0</div></div>
+      <div class="score-box azul" id="score-a"><div class="score-name" id="pub-nom-a">AZULES</div><div class="score-pts" id="pub-pts-a">0</div></div>
+      <div class="score-box rojo" id="score-b"><div class="score-name" id="pub-nom-b">ROJOS</div><div class="score-pts" id="pub-pts-b">0</div></div>
     </div>
-    <div class="timer-public">
-      <svg class="timer-ring" viewBox="0 0 160 160">
-        <circle class="bg-ring" cx="80" cy="80" r="70"/>
-        <circle class="fg-ring" id="ring-fg" cx="80" cy="80" r="70"/>
+    <div class="timer-wrap">
+      <svg class="timer-svg" viewBox="0 0 160 160">
+        <circle class="timer-bg" cx="80" cy="80" r="70"/>
+        <circle class="timer-fg" id="ring-fg" cx="80" cy="80" r="70"/>
       </svg>
-      <div class="timer-number" id="timer-num">--</div>
+      <div class="timer-num" id="timer-num">--</div>
     </div>
     <div class="status-badge waiting" id="status-badge">⏳ Esperando turno</div>
-    <div class="round-info">Ronda <span id="round-num">1</span> · Carta <span id="card-num">-</span>/<span id="card-tot">-</span></div>
+    <div class="round-badge" id="round-badge">Ronda 1</div>
   </div>
-
   <div class="panel-coord">
-    <div class="coord-header">
-      <h3>🎮 Coordinador</h3>
-      <div class="badge-priv">PRIVADO</div>
-    </div>
-    <div class="card-area">
+    <div class="coord-hdr"><h3>🎮 Coordinador</h3><div class="badge-priv">PRIVADO</div></div>
+    <div class="coord-body">
       <div class="card-wrap">
         <img id="coord-img" src="" alt="" style="display:none">
-        <div class="card-placeholder" id="coord-ph"><div style="font-size:2.5rem">🃏</div><div>Presioná <strong>"Iniciar turno"</strong></div></div>
+        <div class="card-ph" id="coord-ph"><div style="font-size:2rem">🃏</div><div>Presioná <strong>Iniciar turno</strong></div></div>
       </div>
       <div class="card-counter" id="card-counter"></div>
+      <div class="activos-wrap" id="activos-wrap" style="display:none">
+        <div class="activo-box jugador-box"><div class="activo-label">🗣️ Jugador</div><div class="activo-name" id="activo-jugador">-</div></div>
+        <div class="activo-box juez-box"><div class="activo-label">⚖️ Juez</div><div class="activo-name" id="activo-juez">-</div></div>
+      </div>
     </div>
     <div class="controls">
-      <!-- Estado: idle -->
-      <div id="ctrl-idle">
-        <button class="btn-ctrl btn-iniciar" id="btn-iniciar">▶ Iniciar turno</button>
-      </div>
-      <!-- Estado: playing -->
+      <div id="ctrl-idle"><button class="btn-ctrl btn-iniciar" id="btn-iniciar">▶ Iniciar turno</button></div>
       <div id="ctrl-playing" style="display:none">
-        <div class="controls-row" style="margin-bottom:.7rem">
+        <div class="ctrl-row" style="margin-bottom:.6rem">
           <button class="btn-ctrl btn-correcto" id="btn-correcto">✅ Correcto</button>
           <button class="btn-ctrl btn-tabu" id="btn-tabu">🚫 Tabú</button>
         </div>
-        <div class="controls-row">
-          <button class="btn-ctrl btn-pausa" id="btn-pausa">⏸ Pausa</button>
-        </div>
+        <div class="ctrl-row"><button class="btn-ctrl btn-pausa" id="btn-pausa">⏸ Pausa</button></div>
       </div>
-      <!-- Estado: ended -->
       <div id="ctrl-ended" style="display:none">
-        <button class="btn-ctrl btn-cambio" id="btn-cambio">🔄 Cambiar equipo y continuar</button>
+        <button class="btn-ctrl btn-cambio" id="btn-cambio">🔄 Siguiente turno / Cambiar equipo</button>
       </div>
-      <div class="controls-row" style="margin-top:.4rem">
-        <button class="btn-ctrl btn-menu" id="btn-menu">🔙 Menú</button>
+      <div class="ctrl-row" style="margin-top:.3rem">
+        <button class="btn-ctrl btn-menu-sm" id="btn-menu">🔙 Menú</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- VISTA MÓVIL (jugador/juez) -->
-<div id="screen-movil" class="screen">
-  <div class="movil-wrap">
-    <div class="movil-hdr jugador" id="movil-hdr">
-      <h2 id="movil-title">🗣️ Tu carta</h2>
+<!-- ===== VISTA MÓVIL ===== -->
+<div id="screen-movil" class="screen center-screen" style="background:linear-gradient(160deg,#0a0f35,#1a1f5e)">
+  <div class="movil-card">
+    <div class="movil-hdr jugador-hdr" id="movil-hdr">
+      <div><h2 id="movil-title">🗣️ Tu carta</h2><div class="player-name" id="movil-player-name"></div></div>
       <div class="movil-timer" id="movil-timer">--</div>
     </div>
-    <div class="movil-progress"><div class="movil-bar" id="movil-bar"></div></div>
+    <div class="movil-prog"><div class="movil-bar" id="movil-bar"></div></div>
     <img id="movil-img" class="movil-img" src="" alt="" style="display:none">
-    <div class="movil-waiting" id="movil-waiting">
-      <div class="w-icon">⏳</div>
-      <div>Esperando que el coordinador<br>inicie el turno...</div>
-    </div>
+    <div class="movil-wait" id="movil-wait"><div class="wi">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div></div>
     <div class="movil-actions" id="movil-actions">
-      <button class="btn-movil btn-mcorrecto" id="btn-mcorrecto" disabled>✅ Correcto</button>
-      <button class="btn-movil btn-mtabu" id="btn-mtabu" disabled>🚫 Tabú</button>
+      <button class="btn-mov btn-mov-ok" id="btn-mov-ok" disabled>✅ Correcto</button>
+      <button class="btn-mov btn-mov-tabu" id="btn-mov-tabu" disabled>🚫 Tabú</button>
     </div>
-    <div class="movil-footer" id="movil-footer">¡Describí sin decir las palabras de la carta!</div>
+    <div class="movil-foot" id="movil-foot">¡Describí sin decir las palabras de la carta!</div>
   </div>
 </div>
 
-<!-- ESPECTADOR -->
-<div id="screen-espectador" class="screen">
-  <div class="confetti-area" id="confetti-esp"></div>
-  <div class="scoreboard" style="max-width:400px;width:100%">
-    <div class="score-team team-a" id="esp-score-a"><div class="score-name" id="esp-nom-a">AZULES</div><div class="score-pts" id="esp-pts-a">0</div></div>
-    <div class="score-team team-b" id="esp-score-b"><div class="score-name" id="esp-nom-b">ROJOS</div><div class="score-pts" id="esp-pts-b">0</div></div>
-  </div>
-  <div class="timer-public">
-    <svg class="timer-ring" viewBox="0 0 160 160">
-      <circle class="bg-ring" cx="80" cy="80" r="70"/>
-      <circle class="fg-ring" id="esp-ring-fg" cx="80" cy="80" r="70"/>
-    </svg>
-    <div class="timer-number" id="esp-timer-num">--</div>
-  </div>
-  <div class="status-badge waiting" id="esp-status">⏳ Esperando turno</div>
-  <div class="round-info" style="color:rgba(255,255,255,.5)">Ronda <span id="esp-round">1</span></div>
-</div>
-
-<!-- ENTRETURNO -->
-<div id="screen-entreturno" class="screen">
-  <div class="et-card">
-    <div class="et-icon">🔄</div>
-    <div class="et-title">Fin del turno</div>
-    <div class="et-desc" id="et-desc">Preparate para el próximo equipo</div>
-    <div class="result-mini">
-      <div class="rm-team a"><div class="rm-name" id="et-nom-a">AZULES</div><div class="rm-pts" id="et-pts-a">0</div></div>
-      <div class="rm-team b"><div class="rm-name" id="et-nom-b">ROJOS</div><div class="rm-pts" id="et-pts-b">0</div></div>
+<!-- ===== RESULTADO RONDA ===== -->
+<div id="screen-resultado" class="screen center-screen">
+  <div class="resultado-card">
+    <div class="resultado-icon">📊</div>
+    <div class="resultado-title" id="res-title">Fin de la ronda</div>
+    <div class="resultado-sub" id="res-sub"></div>
+    <div class="rm-scores">
+      <div class="rm-box a"><div class="rm-name" id="res-nom-a">AZULES</div><div class="rm-pts" id="res-pts-a">0</div></div>
+      <div class="rm-box b"><div class="rm-name" id="res-nom-b">ROJOS</div><div class="rm-pts" id="res-pts-b">0</div></div>
     </div>
-    <button class="btn-primary" id="btn-continuar">▶ Continuar con el siguiente equipo</button>
+    <div class="par-jugado" id="res-par"></div>
+    <button class="btn btn-primary" id="btn-siguiente-ronda" style="margin-bottom:.7rem">▶ Siguiente ronda</button>
+    <button class="btn btn-ghost" id="btn-terminar-juego">🏁 Terminar juego</button>
   </div>
 </div>
 
-<!-- FINAL -->
-<div id="screen-final" class="screen">
+<!-- ===== FINAL ===== -->
+<div id="screen-final" class="screen center-screen">
   <div class="trophy">🏆</div>
   <div class="final-title">¡Juego terminado!</div>
   <div class="final-winner" id="final-winner"></div>
   <div class="final-scores" id="final-scores"></div>
-  <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:1rem">
-    <button class="btn-primary" id="btn-de-nuevo" style="max-width:200px">🔄 Jugar de nuevo</button>
-    <button class="btn-primary" id="btn-al-menu" style="max-width:200px;background:rgba(255,255,255,.1);box-shadow:none">🏠 Menú</button>
-  </div>
+  <button class="btn btn-primary" id="btn-nueva-partida" style="max-width:200px;margin-top:1rem">🔄 Nueva partida</button>
 </div>
 
-<!-- PAUSA -->
+<!-- ===== PAUSA ===== -->
 <div id="overlay-pausa">
   <h2>⏸ PAUSA</h2>
   <p style="color:rgba(255,255,255,.6)">El juego está pausado</p>
-  <button class="btn-primary" id="btn-reanudar" style="max-width:200px">▶ Reanudar</button>
+  <button class="btn btn-primary" id="btn-reanudar" style="max-width:180px">▶ Reanudar</button>
 </div>
 
 <div id="toasts"></div>
 
 <script>
-// =============================================
-// ESTADO GLOBAL
-// =============================================
-const G = {
-  cards: [],
-  deck: [],
-  deckIdx: 0,
-  currentCardIdx: -1,   // índice en deck de la carta actual
-  teams: [{ name:'AZULES', score:0 }, { name:'ROJOS', score:0 }],
-  currentTeam: 0,
-  timerSecs: 45,
-  timerLeft: 45,
-  timerInterval: null,
-  running: false,
-  paused: false,
-  round: 1,
-  turnScore: 0,
-  gamePhase: 'idle',    // idle | playing | ended
-  rolesSwapped: false,  // false = jugador es equipo A, juez es equipo B; true = invertido
-};
-
-const PIN = '1234';
-
-// =============================================
-// Firebase REST API (sin SDK externo)
-// =============================================
+// ================================================
+// FIREBASE REST API
+// ================================================
 const FB_URL = "https://tabu-neuro-default-rtdb.firebaseio.com";
-// (FB_KEY not needed in test mode)
-
-// Objeto que imita la interfaz de Firebase SDK usando REST + SSE
-const refGame = makeRef('game');
-const refAction = makeRef('action');
 
 function makeRef(path) {
   const url = `${FB_URL}/${path}.json`;
-  let es = null;
-  let onCb = null;
-
-  // Polling cada 500ms como mecanismo principal (SSE puede fallar en móviles)
   let pollInterval = null;
-  let lastData = undefined;
-
-  function startPolling(cb) {
-    if (pollInterval) clearInterval(pollInterval);
-    pollInterval = setInterval(() => {
-      fetch(url)
-        .then(r => r.json())
-        .then(data => {
-          // Solo llamar callback si los datos cambiaron
-          const str = JSON.stringify(data);
-          if (str !== lastData) {
-            lastData = str;
-            cb({ val: () => data });
-          }
-        })
-        .catch(() => {});
-    }, 500);
-    // Lectura inmediata
-    fetch(url).then(r => r.json()).then(data => {
-      lastData = JSON.stringify(data);
-      cb({ val: () => data });
-    }).catch(() => {});
-  }
+  let lastJson = undefined;
 
   return {
     set(data) {
-      return fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      }).catch(e => console.warn('FB set error', e));
+      return fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
+        .catch(e => console.warn('FB set error', e));
+    },
+    update(data) {
+      return fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
+        .catch(e => console.warn('FB update error', e));
     },
     remove() {
-      return fetch(url, { method: 'DELETE' })
-        .catch(e => console.warn('FB remove error', e));
+      return fetch(url, { method:'DELETE' }).catch(e => console.warn('FB remove error', e));
     },
     once() {
       return fetch(url).then(r => r.json()).then(data => ({ val: () => data }));
     },
     on(evt, cb) {
-      onCb = cb;
-      startPolling(cb);
+      const poll = () => {
+        fetch(url).then(r => r.json()).then(data => {
+          const j = JSON.stringify(data);
+          if (j !== lastJson) { lastJson = j; cb({ val: () => data }); }
+        }).catch(() => {});
+      };
+      poll();
+      pollInterval = setInterval(poll, 500);
     },
-    off() {
-      if (pollInterval) clearInterval(pollInterval);
-      pollInterval = null;
-    }
+    off() { if(pollInterval) { clearInterval(pollInterval); pollInterval = null; } }
   };
 }
 
-// =============================================
-// UTILIDADES
-// =============================================
+const refGame    = makeRef('game');
+const refPlayers = makeRef('players');
+const refAction  = makeRef('action');
+
+// ================================================
+// ESTADO
+// ================================================
+const PIN = '1234';
+
+const G = {
+  // Config
+  cards: [], deck: [], deckIdx: 0, currentCardIdx: -1,
+  timerSecs: 45, timerLeft: 45, timerInterval: null,
+  running: false, paused: false,
+  // Equipos
+  teams: [{ name:'AZULES', score:0 }, { name:'ROJOS', score:0 }],
+  // Ronda
+  round: 1,
+  currentTeam: 0,       // equipo que describe en este turno (0=A, 1=B)
+  turnWithinRound: 0,   // 0 = primer turno de la ronda, 1 = segundo (roles invertidos)
+  gamePhase: 'idle',    // idle | playing | ended | resultado
+  turnScore: 0,
+  // Jugadores activos este turno
+  jugadorActivo: null,  // { nombre, equipo }
+  juezActivo: null,
+  // Historial de quién ya jugó
+  yaJugaron: { a: [], b: [] },
+  rolesSwapped: false,
+};
+
+// ================================================
+// UTILS
+// ================================================
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -509,66 +520,28 @@ function toast(msg, type='info') {
 
 function shuffle(arr) {
   const a = [...arr];
-  for (let i=a.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
 
-// =============================================
-// PUBLICAR ESTADO (solo coordinador escribe)
-// =============================================
-function publish() {
-  const card = G.deck[G.currentCardIdx] || null;
-  try {
-    refGame.set({
-      phase: G.gamePhase,
-      cardDataUrl: card ? card.dataUrl : null,
-      cardIdx: G.currentCardIdx,
-      deckIdx: G.deckIdx,
-      deckLen: G.deck.length,
-      timerLeft: G.timerLeft,
-      timerSecs: G.timerSecs,
-      running: G.running,
-      paused: G.paused,
-      round: G.round,
-      scores: [G.teams[0].score, G.teams[1].score],
-      names: [G.teams[0].name, G.teams[1].name],
-      currentTeam: G.currentTeam,
-      rolesSwapped: G.rolesSwapped,
-      ts: Date.now(),
-    });
-  } catch(e) { console.warn('publish failed', e); }
-}
-
-// =============================================
-// SELECCIÓN DE ROL
-// =============================================
+// ================================================
+// ROL
+// ================================================
 function elegirRol(rol) {
-  if (rol === 'coordinador') {
-    showScreen('screen-pin');
-    setTimeout(() => document.getElementById('pin-input').focus(), 100);
-  } else if (rol === 'jugador' || rol === 'juez') {
-    initMobile(rol);
-  } else {
-    initEspectador();
-  }
+  if (rol === 'coordinador') { showScreen('screen-pin'); setTimeout(() => document.getElementById('pin-input').focus(), 100); }
+  else { showScreen('screen-lobby'); actualizarLabelsLobby(); }
 }
 
 function verificarPin() {
   const v = document.getElementById('pin-input').value;
-  if (v === PIN) {
-    document.getElementById('pin-error').style.display = 'none';
-    showScreen('screen-setup');
-  } else {
-    document.getElementById('pin-error').style.display = 'block';
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-input').focus();
-  }
+  if (v === PIN) { document.getElementById('pin-err').style.display='none'; showScreen('screen-setup'); }
+  else { document.getElementById('pin-err').style.display='block'; document.getElementById('pin-input').value=''; document.getElementById('pin-input').focus(); }
 }
 document.getElementById('pin-input').addEventListener('keydown', e => { if(e.key==='Enter') verificarPin(); });
 
-// =============================================
-// CARGA DE CARTAS
-// =============================================
+// ================================================
+// SETUP
+// ================================================
 const uploadZone = document.getElementById('upload-zone');
 const fileInput  = document.getElementById('file-input');
 uploadZone.addEventListener('click', () => fileInput.click());
@@ -583,94 +556,248 @@ function loadFiles(files) {
   G.cards = []; let done = 0;
   imgs.forEach(f => {
     const r = new FileReader();
-    r.onload = e => {
-      G.cards.push({ name:f.name, dataUrl:e.target.result });
-      if (++done === imgs.length) {
-        document.getElementById('cards-num').textContent = G.cards.length;
-        toast(`✅ ${G.cards.length} cartas cargadas`, 'ok');
-      }
-    };
+    r.onload = e => { G.cards.push({ name:f.name, dataUrl:e.target.result }); if(++done===imgs.length) toast(`✅ ${G.cards.length} cartas`, 'ok'); };
     r.readAsDataURL(f);
   });
 }
 
 document.querySelectorAll('.timer-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.timer-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    G.timerSecs = parseInt(b.dataset.s);
-  });
+  b.addEventListener('click', () => { document.querySelectorAll('.timer-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); G.timerSecs=parseInt(b.dataset.s); });
 });
-document.getElementById('nombre-a').addEventListener('input', e => G.teams[0].name = e.target.value.trim().toUpperCase() || 'AZULES');
-document.getElementById('nombre-b').addEventListener('input', e => G.teams[1].name = e.target.value.trim().toUpperCase() || 'ROJOS');
 
-document.getElementById('btn-comenzar').addEventListener('click', () => {
+document.getElementById('nombre-a').addEventListener('input', e => { G.teams[0].name = e.target.value.trim().toUpperCase() || 'AZULES'; actualizarLabelsLobby(); });
+document.getElementById('nombre-b').addEventListener('input', e => { G.teams[1].name = e.target.value.trim().toUpperCase() || 'ROJOS'; actualizarLabelsLobby(); });
+
+document.getElementById('btn-ir-lobby').addEventListener('click', () => {
   if (G.cards.length === 0) G.cards = CARTAS_EMBEBIDAS;
+  // Limpiar jugadores anteriores
+  refPlayers.set(null);
+  refGame.set({ phase:'lobby', names:[G.teams[0].name, G.teams[1].name] });
+  showScreen('screen-lobby-coord');
+  escucharJugadores();
+});
+
+// ================================================
+// LOBBY
+// ================================================
+function actualizarLabelsLobby() {
+  document.getElementById('label-eq-a').textContent = G.teams[0].name;
+  document.getElementById('label-eq-b').textContent = G.teams[1].name;
+}
+
+// Jugador se une
+document.getElementById('btn-unirse-a').addEventListener('click', () => unirse(0));
+document.getElementById('btn-unirse-b').addEventListener('click', () => unirse(1));
+
+function unirse(equipo) {
+  const nombre = document.getElementById('nombre-jugador').value.trim();
+  if (!nombre) { toast('Escribí tu nombre primero', 'err'); return; }
+  const id = Date.now() + '_' + Math.random().toString(36).substr(2,5);
+  const jugador = { id, nombre, equipo, yaJugo: false };
+  // Guardar en Firebase
+  makeRef(`players/${id}`).set(jugador);
+  // Guardar localmente para identificarse
+  sessionStorage.setItem('tabu_jugador', JSON.stringify(jugador));
+  // Mostrar pantalla de espera
+  document.getElementById('espera-nombre').textContent = nombre;
+  const eqEl = document.getElementById('espera-equipo');
+  eqEl.textContent = equipo === 0 ? G.teams[0].name : G.teams[1].name;
+  eqEl.className = `espera-equipo ${equipo===0?'a':'b'}`;
+  showScreen('screen-espera');
+  // Escuchar inicio del juego
+  escucharInicioJuego();
+}
+
+// Coordinador escucha jugadores
+let jugadoresActuales = {};
+function escucharJugadores() {
+  refPlayers.on('value', snap => {
+    jugadoresActuales = snap.val() || {};
+    renderLobbyCoord();
+  });
+}
+
+function renderLobbyCoord() {
+  const j = Object.values(jugadoresActuales);
+  const a = j.filter(p => p.equipo === 0);
+  const b = j.filter(p => p.equipo === 1);
+
+  const wrap = document.getElementById('lobby-equipos');
+  wrap.innerHTML = `
+    <div class="equipo-panel azul">
+      <div class="equipo-title">🔵 ${G.teams[0].name} (${a.length})</div>
+      ${a.length ? a.map(p => `<div class="jugador-chip"><span class="chip-icon">👤</span>${p.nombre}</div>`).join('') : '<div class="equipo-vacio">Nadie aún...</div>'}
+    </div>
+    <div class="equipo-panel rojo">
+      <div class="equipo-title">🔴 ${G.teams[1].name} (${b.length})</div>
+      ${b.length ? b.map(p => `<div class="jugador-chip"><span class="chip-icon">👤</span>${p.nombre}</div>`).join('') : '<div class="equipo-vacio">Nadie aún...</div>'}
+    </div>
+  `;
+
+  const btn = document.getElementById('btn-iniciar-juego');
+  btn.disabled = a.length === 0 || b.length === 0;
+  btn.textContent = (a.length === 0 || b.length === 0)
+    ? `🚀 Necesitás al menos 1 por equipo`
+    : `🚀 ¡Iniciar juego! (${j.length} jugadores)`;
+}
+
+document.getElementById('btn-iniciar-juego').addEventListener('click', () => {
   iniciarJuego();
 });
 
-// =============================================
-// LÓGICA COORDINADOR
-// =============================================
+// Jugador espera inicio
+function escucharInicioJuego() {
+  refGame.on('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    if (d.phase === 'playing' || d.phase === 'idle') {
+      // Revisar si este jugador es el activo
+      const yo = JSON.parse(sessionStorage.getItem('tabu_jugador') || 'null');
+      if (!yo) return;
+      if (d.jugadorActivo && d.jugadorActivo.id === yo.id) {
+        iniciarVistaMovil('jugador', yo, d);
+      } else if (d.juezActivo && d.juezActivo.id === yo.id) {
+        iniciarVistaMovil('juez', yo, d);
+      } else {
+        // No es el activo, seguir esperando o actualizar mensaje
+        const msg = document.getElementById('espera-turno-msg');
+        if (d.phase !== 'lobby') {
+          msg.style.display = 'block';
+          msg.textContent = '⏳ Esperando tu turno...';
+        }
+      }
+    } else if (d.phase === 'resultado') {
+      // Mostrar pantalla resultado para jugadores
+      const yo = JSON.parse(sessionStorage.getItem('tabu_jugador') || 'null');
+      if (yo) mostrarResultadoJugador(d);
+    } else if (d.phase === 'final') {
+      mostrarFinal(d);
+    }
+  });
+}
+
+// ================================================
+// INICIAR JUEGO
+// ================================================
 function iniciarJuego() {
   G.deck = shuffle(G.cards);
   G.deckIdx = 0;
   G.currentCardIdx = -1;
   G.teams[0].score = 0; G.teams[1].score = 0;
-  G.currentTeam = 0;
   G.round = 1;
+  G.turnWithinRound = 0;
+  G.currentTeam = 0;
   G.timerLeft = G.timerSecs;
   G.running = false;
   G.paused = false;
   G.turnScore = 0;
-  G.gamePhase = 'idle';
+  G.rolesSwapped = false;
+  G.yaJugaron = { a: [], b: [] };
 
-  // Publicar estado inicial (sin carta) para que jugador/juez vean "esperando"
-  publish();
+  elegirPar();
   renderCoord();
-  startCoordListener();
   showScreen('screen-juego');
+  escucharAccionesJuez();
 }
 
+// ================================================
+// ELEGIR PAR (jugador + juez)
+// ================================================
+function elegirPar() {
+  const todos = Object.values(jugadoresActuales);
+  const equipoA = todos.filter(p => p.equipo === 0);
+  const equipoB = todos.filter(p => p.equipo === 1);
+
+  // Disponibles = los que no jugaron aún (con reposición si todos jugaron)
+  function disponibles(equipo) {
+    const yaJ = G.yaJugaron[equipo === 0 ? 'a' : 'b'];
+    let disp = equipo === 0 ? equipoA.filter(p => !yaJ.includes(p.id)) : equipoB.filter(p => !yaJ.includes(p.id));
+    if (disp.length === 0) {
+      // Todos jugaron, reset para este equipo
+      if (equipo === 0) G.yaJugaron.a = [];
+      else G.yaJugaron.b = [];
+      disp = equipo === 0 ? [...equipoA] : [...equipoB];
+    }
+    return disp;
+  }
+
+  const dispA = disponibles(0);
+  const dispB = disponibles(1);
+
+  const elegidoA = dispA[Math.floor(Math.random() * dispA.length)];
+  const elegidoB = dispB[Math.floor(Math.random() * dispB.length)];
+
+  // Turno 0: A describe, B juzga
+  G.jugadorActivo = elegidoA;
+  G.juezActivo = elegidoB;
+  G.currentTeam = 0;
+  G.turnWithinRound = 0;
+
+  // Registrar que jugaron
+  G.yaJugaron.a.push(elegidoA.id);
+  G.yaJugaron.b.push(elegidoB.id);
+
+  publish();
+}
+
+// ================================================
+// PUBLICAR
+// ================================================
+function publish() {
+  const card = G.deck[G.currentCardIdx] || null;
+  refGame.set({
+    phase: G.gamePhase === 'idle' ? 'idle' : G.gamePhase,
+    cardDataUrl: card ? card.dataUrl : null,
+    cardIdx: G.currentCardIdx,
+    timerLeft: G.timerLeft,
+    timerSecs: G.timerSecs,
+    running: G.running,
+    paused: G.paused,
+    round: G.round,
+    scores: [G.teams[0].score, G.teams[1].score],
+    names: [G.teams[0].name, G.teams[1].name],
+    currentTeam: G.currentTeam,
+    rolesSwapped: G.rolesSwapped,
+    jugadorActivo: G.jugadorActivo,
+    juezActivo: G.juezActivo,
+    ts: Date.now(),
+  });
+}
+
+// ================================================
+// LÓGICA DE TURNO
+// ================================================
 document.getElementById('btn-iniciar').addEventListener('click', iniciarTurno);
 document.getElementById('btn-correcto').addEventListener('click', accionCorrecto);
 document.getElementById('btn-tabu').addEventListener('click', accionTabu);
 document.getElementById('btn-pausa').addEventListener('click', togglePausa);
 document.getElementById('btn-reanudar').addEventListener('click', togglePausa);
-document.getElementById('btn-cambio').addEventListener('click', () => {
-  finalizarTurno();
-  showScreen('screen-entreturno');
-  renderEntreturno();
-});
-document.getElementById('btn-continuar').addEventListener('click', () => {
-  showScreen('screen-juego');
-  prepararNuevoTurno();
-});
+document.getElementById('btn-cambio').addEventListener('click', siguienteTurno);
 document.getElementById('btn-menu').addEventListener('click', () => {
   clearInterval(G.timerInterval); G.running = false;
-  localStorage.removeItem(LS.GAME);
+  refGame.set(null); refPlayers.set(null); refAction.set(null);
   showScreen('screen-bienvenida');
 });
-document.getElementById('btn-de-nuevo').addEventListener('click', () => iniciarJuego());
-document.getElementById('btn-al-menu').addEventListener('click', () => { localStorage.removeItem(LS.GAME); showScreen('screen-bienvenida'); });
+document.getElementById('btn-nueva-partida').addEventListener('click', () => {
+  refGame.set(null); refPlayers.set(null); refAction.set(null);
+  showScreen('screen-bienvenida');
+});
 
 function iniciarTurno() {
   G.gamePhase = 'playing';
   G.turnScore = 0;
   G.timerLeft = G.timerSecs;
   G.paused = false;
-  siguienteCarta();           // muestra la primera carta
+  siguienteCarta();
   startTimer();
   renderCoord();
-  publish();                  // ← jugador y juez reciben la carta aquí
+  publish();
 }
 
 function siguienteCarta() {
   if (G.deckIdx >= G.deck.length) {
-    G.deck = shuffle(G.cards);
-    G.deckIdx = 0;
-    G.round++;
-    toast('🔄 Nuevo mazo barajado', 'info');
+    G.deck = shuffle(G.cards); G.deckIdx = 0;
+    toast('🔄 Nuevo mazo', 'info');
   }
   G.currentCardIdx = G.deckIdx++;
   renderCartaCoord();
@@ -683,7 +810,7 @@ function accionCorrecto() {
   G.turnScore++;
   renderPublico(true);
   confetti();
-  toast(`✅ Correcto! +1 punto`, 'ok');
+  toast(`✅ +1 punto`, 'ok');
   siguienteCarta();
 }
 
@@ -704,32 +831,88 @@ function togglePausa() {
   publish();
 }
 
-function finalizarTurno() {
+function siguienteTurno() {
   clearInterval(G.timerInterval); G.running = false;
-  G.currentTeam = G.currentTeam === 0 ? 1 : 0;
-  G.gamePhase = 'idle';
-  G.rolesSwapped = !G.rolesSwapped;  // invertir roles
-  console.log('finalizarTurno: rolesSwapped ahora =', G.rolesSwapped);
-  publish();
+
+  if (G.turnWithinRound === 0) {
+    // Primer turno terminó → invertir roles para segundo turno
+    G.turnWithinRound = 1;
+    G.currentTeam = 1;
+    G.rolesSwapped = !G.rolesSwapped;
+    // Intercambiar jugador y juez
+    const temp = G.jugadorActivo;
+    G.jugadorActivo = G.juezActivo;
+    G.juezActivo = temp;
+    G.gamePhase = 'idle';
+    G.currentCardIdx = -1;
+    G.timerLeft = G.timerSecs;
+    renderCoord();
+    publish();
+    toast(`🔄 Turno del equipo ${G.teams[1].name}`, 'info');
+  } else {
+    // Segundo turno terminó → fin de ronda
+    G.turnWithinRound = 0;
+    finRonda();
+  }
 }
 
-function prepararNuevoTurno() {
-  G.timerLeft = G.timerSecs;
-  G.turnScore = 0;
+function finRonda() {
+  G.gamePhase = 'resultado';
+  const todos = Object.values(jugadoresActuales);
+  const maxRondas = Math.max(todos.filter(p=>p.equipo===0).length, todos.filter(p=>p.equipo===1).length);
+  const hayMas = G.round < maxRondas ||
+    G.yaJugaron.a.length < todos.filter(p=>p.equipo===0).length ||
+    G.yaJugaron.b.length < todos.filter(p=>p.equipo===1).length;
+
+  refGame.set({
+    phase: 'resultado',
+    scores: [G.teams[0].score, G.teams[1].score],
+    names: [G.teams[0].name, G.teams[1].name],
+    round: G.round,
+    jugadorActivo: G.jugadorActivo,
+    juezActivo: G.juezActivo,
+    hayMasRondas: hayMas,
+    ts: Date.now(),
+  });
+
+  renderResultado(hayMas);
+  showScreen('screen-resultado');
+}
+
+// ================================================
+// RENDER RESULTADO (coordinador)
+// ================================================
+function renderResultado(hayMas) {
+  document.getElementById('res-title').textContent = `Fin de la ronda ${G.round}`;
+  document.getElementById('res-nom-a').textContent = G.teams[0].name;
+  document.getElementById('res-nom-b').textContent = G.teams[1].name;
+  document.getElementById('res-pts-a').textContent = G.teams[0].score;
+  document.getElementById('res-pts-b').textContent = G.teams[1].score;
+  document.getElementById('res-par').textContent = `Jugaron: ${G.jugadorActivo?.nombre} y ${G.juezActivo?.nombre}`;
+  document.getElementById('res-sub').textContent = hayMas ? `Quedan más rondas por jugar` : `¡Última ronda!`;
+  document.getElementById('btn-siguiente-ronda').style.display = hayMas ? 'block' : 'none';
+}
+
+document.getElementById('btn-siguiente-ronda').addEventListener('click', () => {
+  G.round++;
+  G.rolesSwapped = false;
+  G.gamePhase = 'idle';
   G.currentCardIdx = -1;
-  G.paused = false;
-  G.gamePhase = 'idle';
+  G.timerLeft = G.timerSecs;
+  elegirPar();
   renderCoord();
-  renderPublico();
-  publish();
-}
+  showScreen('screen-juego');
+});
 
-// =============================================
+document.getElementById('btn-terminar-juego').addEventListener('click', () => {
+  mostrarFinal();
+});
+
+// ================================================
 // TIMER
-// =============================================
+// ================================================
 function startTimer() {
-  clearInterval(G.timerInterval);
-  G.running = true;
+  clearInterval(G.timerInterval); G.running = true;
   startTimerTick();
 }
 
@@ -744,7 +927,7 @@ function startTimerTick() {
       clearInterval(G.timerInterval); G.running = false;
       G.gamePhase = 'ended';
       playAlarm();
-      toast(`⏰ ¡Tiempo! ${G.teams[G.currentTeam].name} anotó ${G.turnScore} pts`, 'info');
+      toast(`⏰ ¡Tiempo! ${G.teams[G.currentTeam].name} sumó ${G.turnScore} pts`, 'info');
       renderCoord();
       publish();
     }
@@ -755,26 +938,35 @@ function playAlarm() {
   try {
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
     [0,.15,.3,.45,.6,.75].forEach((t,i) => {
-      const o=ctx.createOscillator(), g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value=i%2===0?880:660; o.type='square';
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=i%2===0?880:660;o.type='square';
       g.gain.setValueAtTime(.3,ctx.currentTime+t);
       g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.12);
-      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+.15);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.15);
     });
   } catch(e){}
 }
 
-// =============================================
+// ================================================
 // RENDER COORDINADOR
-// =============================================
+// ================================================
 function renderCoord() {
   renderPublico();
   renderCartaCoord();
-  // Controles
   document.getElementById('ctrl-idle').style.display    = G.gamePhase==='idle'    ? 'block' : 'none';
   document.getElementById('ctrl-playing').style.display = G.gamePhase==='playing' ? 'block' : 'none';
   document.getElementById('ctrl-ended').style.display   = G.gamePhase==='ended'   ? 'block' : 'none';
+
+  // Jugadores activos
+  const wrap = document.getElementById('activos-wrap');
+  if (G.jugadorActivo && G.juezActivo) {
+    wrap.style.display = 'flex';
+    document.getElementById('activo-jugador').textContent = G.jugadorActivo.nombre;
+    document.getElementById('activo-juez').textContent = G.juezActivo.nombre;
+  }
+
+  document.getElementById('round-badge').textContent = `Ronda ${G.round} · Turno ${G.turnWithinRound+1}/2`;
 }
 
 function renderCartaCoord() {
@@ -782,14 +974,11 @@ function renderCartaCoord() {
   const ph  = document.getElementById('coord-ph');
   const card = G.deck[G.currentCardIdx];
   if (card) {
-    img.src = card.dataUrl; img.style.display='block'; ph.style.display='none';
+    img.src=card.dataUrl; img.style.display='block'; ph.style.display='none';
     document.getElementById('card-counter').textContent = `Carta ${G.deckIdx} de ${G.deck.length}`;
-    document.getElementById('card-num').textContent = G.deckIdx;
-    document.getElementById('card-tot').textContent = G.deck.length;
   } else {
     img.style.display='none'; ph.style.display='flex';
     document.getElementById('card-counter').textContent='';
-    document.getElementById('card-num').textContent='-';
   }
 }
 
@@ -804,38 +993,28 @@ function renderPublico(animate) {
     const el = G.currentTeam===0 ? pA : pB;
     el.classList.remove('score-pop'); void el.offsetWidth; el.classList.add('score-pop');
   }
-  document.getElementById('score-a').classList.toggle('active', G.currentTeam===0);
-  document.getElementById('score-b').classList.toggle('active', G.currentTeam===1);
-  document.getElementById('round-num').textContent = G.round;
-
-  const badge = document.getElementById('status-badge');
-  const states = { idle:'⏳ Esperando turno', playing:'🟢 Ronda en curso', ended:'⏰ Fin del turno' };
-  badge.textContent = states[G.gamePhase]||'';
-  badge.className = 'status-badge ' + (G.gamePhase==='playing'?'playing':G.gamePhase==='ended'?'ended':'waiting');
+  document.getElementById('score-a').classList.toggle('activo', G.currentTeam===0 && G.gamePhase==='playing');
+  document.getElementById('score-b').classList.toggle('activo', G.currentTeam===1 && G.gamePhase==='playing');
   renderTimerPublico(G.timerLeft);
+  const badge = document.getElementById('status-badge');
+  const st = {idle:'⏳ Esperando turno', playing:'🟢 Ronda en curso', ended:'⏰ Fin del turno'};
+  badge.textContent = st[G.gamePhase]||'⏳ Esperando turno';
+  badge.className = 'status-badge '+(G.gamePhase==='playing'?'playing':G.gamePhase==='ended'?'ended':'waiting');
+  document.getElementById('round-badge').textContent = `Ronda ${G.round} · Turno ${G.turnWithinRound+1}/2`;
 }
 
 function renderTimerPublico(s) {
-  const num  = document.getElementById('timer-num');
-  const ring = document.getElementById('ring-fg');
-  const circ = 2*Math.PI*70;
-  num.textContent = s;
-  ring.style.strokeDashoffset = circ * (1 - s/G.timerSecs);
-  num.classList.toggle('urgent', s<=10);
-  ring.style.stroke = s<=10?'#e84f4f':s<=20?'#f39c12':'#2ecc71';
-}
-
-function renderEntreturno() {
-  document.getElementById('et-nom-a').textContent = G.teams[0].name;
-  document.getElementById('et-nom-b').textContent = G.teams[1].name;
-  document.getElementById('et-pts-a').textContent = G.teams[0].score;
-  document.getElementById('et-pts-b').textContent = G.teams[1].score;
-  document.getElementById('et-desc').textContent = `Le toca al equipo ${G.teams[G.currentTeam].name}`;
+  const num=document.getElementById('timer-num'), ring=document.getElementById('ring-fg');
+  const circ=2*Math.PI*70;
+  num.textContent=s;
+  ring.style.strokeDashoffset=circ*(1-s/G.timerSecs);
+  num.classList.toggle('urgent',s<=10);
+  ring.style.stroke=s<=10?'#e84f4f':s<=20?'#f39c12':'#2ecc71';
 }
 
 function confetti() {
-  const area = document.getElementById('confetti-area');
-  ['#f7c948','#2ecc71','#4f5fe8','#e84f4f','#fff'].forEach((c,i) => {
+  const area=document.getElementById('confetti-area');
+  ['#f7c948','#2ecc71','#4f5fe8','#e84f4f','#fff'].forEach(c => {
     for(let j=0;j<4;j++){
       const p=document.createElement('div'); p.className='cp';
       p.style.cssText=`left:${Math.random()*100}%;background:${c};animation-duration:${.8+Math.random()*1.2}s;animation-delay:${Math.random()*.3}s;`;
@@ -844,185 +1023,140 @@ function confetti() {
   });
 }
 
-// =============================================
-// VISTA MÓVIL (jugador / juez)
-// =============================================
-function initMobile(rol) {
-  showScreen('screen-movil');
+// ================================================
+// VISTA MÓVIL
+// ================================================
+function iniciarVistaMovil(rol, yo, estadoInicial) {
   let esJuez = rol === 'juez';
+  showScreen('screen-movil');
 
-  // Header según rol
-  document.getElementById('movil-hdr').className = `movil-hdr ${esJuez?'juez':'jugador'}`;
-  document.getElementById('movil-title').textContent = esJuez ? '⚖️ Vista Juez' : '🗣️ Tu carta';
-  document.getElementById('movil-footer').textContent = esJuez
-    ? 'Controlá que no digan palabras prohibidas'
-    : '¡Describí sin decir las palabras de la carta!';
+  function actualizarHeaderMovil() {
+    const hdr = document.getElementById('movil-hdr');
+    hdr.className = `movil-hdr ${esJuez ? 'juez-hdr' : 'jugador-hdr'}`;
+    document.getElementById('movil-title').textContent = esJuez ? '⚖️ Vista Juez' : '🗣️ Tu carta';
+    document.getElementById('movil-player-name').textContent = yo.nombre;
+    document.getElementById('movil-foot').textContent = esJuez
+      ? 'Controlá que no digan palabras prohibidas'
+      : '¡Describí sin decir las palabras de la carta!';
+    const actions = document.getElementById('movil-actions');
+    if (esJuez) actions.classList.add('visible');
+    else actions.classList.remove('visible');
+  }
 
-  // Botones del juez visibles
-  if (esJuez) document.getElementById('movil-actions').classList.add('visible');
+  actualizarHeaderMovil();
 
-  // Acciones juez → Firebase → coordinador
-  document.getElementById('btn-mcorrecto').addEventListener('click', () => {
+  // Botones juez
+  document.getElementById('btn-mov-ok').addEventListener('click', () => {
     refAction.set({ action:'correcto', ts:Date.now() });
-    toast('✅ Correcto enviado', 'ok');
+    toast('✅ Enviado', 'ok');
   });
-  document.getElementById('btn-mtabu').addEventListener('click', () => {
+  document.getElementById('btn-mov-tabu').addEventListener('click', () => {
     refAction.set({ action:'tabu', ts:Date.now() });
-    toast('🚫 Tabú enviado', 'err');
+    toast('🚫 Enviado', 'err');
   });
 
   let lastCardIdx = -2;
-
   let lastRolesSwapped = null;
 
-  function applyGameState(d) {
+  function apply(d) {
     if (!d) return;
-    console.log('applyGameState:', d.phase, 'rolesSwapped:', d.rolesSwapped, 'lastRolesSwapped:', lastRolesSwapped, 'esJuez:', esJuez);
 
     // Detectar cambio de roles
     if (lastRolesSwapped !== null && d.rolesSwapped !== lastRolesSwapped) {
-      console.log('🔄 CAMBIANDO ROL!');
-      // Los roles se invirtieron — cambiar rol actual
-      const nuevoRol = esJuez ? 'jugador' : 'juez';
       esJuez = !esJuez;
-
-      // Actualizar UI del header
-      document.getElementById('movil-hdr').className = `movil-hdr ${esJuez ? 'juez' : 'jugador'}`;
-      document.getElementById('movil-title').textContent = esJuez ? '⚖️ Vista Juez' : '🗣️ Tu carta';
-      document.getElementById('movil-footer').textContent = esJuez
-        ? 'Controlá que no digan palabras prohibidas'
-        : '¡Describí sin decir las palabras de la carta!';
-
-      // Mostrar/ocultar botones juez
-      const actions = document.getElementById('movil-actions');
-      if (esJuez) actions.classList.add('visible');
-      else actions.classList.remove('visible');
-
-      toast(`🔄 Ahora sos ${esJuez ? 'Juez' : 'Jugador'}`, 'info');
+      actualizarHeaderMovil();
+      toast(`🔄 Ahora sos ${esJuez ? 'Juez ⚖️' : 'Jugador 🗣️'}`, 'info');
     }
     lastRolesSwapped = d.rolesSwapped;
 
     // Timer
-    const elapsed = (Date.now() - d.ts) / 1000;
-    const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
-    const timerEl = document.getElementById('movil-timer');
-    timerEl.textContent = left;
-    timerEl.classList.toggle('urgent', left<=10);
+    const elapsed = (Date.now()-d.ts)/1000;
+    const left = d.running ? Math.max(0, d.timerLeft-Math.floor(elapsed)) : d.timerLeft;
+    const tel = document.getElementById('movil-timer');
+    tel.textContent = left;
+    tel.classList.toggle('urgent', left<=10);
     const bar = document.getElementById('movil-bar');
-    bar.style.width = (left / d.timerSecs * 100) + '%';
+    bar.style.width = (left/d.timerSecs*100)+'%';
     bar.classList.toggle('urgent', left<=10);
 
-    // Carta: solo actualizar si cambió el índice
+    // Carta
     if (d.cardIdx !== lastCardIdx) {
       lastCardIdx = d.cardIdx;
-      const img     = document.getElementById('movil-img');
-      const waiting = document.getElementById('movil-waiting');
+      const img  = document.getElementById('movil-img');
+      const wait = document.getElementById('movil-wait');
       if (d.phase === 'playing' && d.cardDataUrl) {
-        img.src = d.cardDataUrl;
-        img.style.display = 'block';
-        waiting.style.display = 'none';
+        img.src = d.cardDataUrl; img.style.display='block'; wait.style.display='none';
       } else {
-        img.style.display = 'none';
-        waiting.style.display = 'flex';
-        waiting.innerHTML = d.phase === 'ended'
-          ? '<div class="w-icon">⏰</div><div>Fin del turno</div>'
-          : '<div class="w-icon">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div>';
+        img.style.display='none'; wait.style.display='flex';
+        wait.innerHTML = d.phase==='ended'
+          ? '<div class="wi">⏰</div><div>Fin del turno</div>'
+          : '<div class="wi">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div>';
       }
     }
 
-    // Habilitar/deshabilitar botones juez
+    // Botones juez
     if (esJuez) {
-      const activo = d.phase === 'playing' && d.running && !d.paused;
-      document.getElementById('btn-mcorrecto').disabled = !activo;
-      document.getElementById('btn-mtabu').disabled = !activo;
+      const activo = d.phase==='playing' && d.running && !d.paused;
+      document.getElementById('btn-mov-ok').disabled = !activo;
+      document.getElementById('btn-mov-tabu').disabled = !activo;
     }
+
+    // Ir a resultado
+    if (d.phase === 'resultado') mostrarResultadoJugador(d);
+    if (d.phase === 'final') mostrarFinal(d);
   }
 
-  // Escuchar Firebase en tiempo real
-  refGame.on('value', snap => { applyGameState(snap.val()); });
-  
-  // Polling fallback para el timer (Firebase no actualiza cada segundo)
-  setInterval(() => {
-    refGame.once('value').then(snap => applyGameState(snap.val()));
-  }, 1000);
+  refGame.on('value', snap => { if(snap.val()) apply(snap.val()); });
 }
 
-// =============================================
-// VISTA ESPECTADOR
-// =============================================
-function initEspectador() {
-  showScreen('screen-espectador');
-  let lastCardIdx = -2;
-
-  function syncEsp(d) {
-    try {
-      if (!d) return;
-      const elapsed = (Date.now()-d.ts)/1000;
-      const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
-
-      document.getElementById('esp-nom-a').textContent = d.names[0];
-      document.getElementById('esp-nom-b').textContent = d.names[1];
-      document.getElementById('esp-pts-a').textContent = d.scores[0];
-      document.getElementById('esp-pts-b').textContent = d.scores[1];
-      document.getElementById('esp-score-a').classList.toggle('active', d.currentTeam===0);
-      document.getElementById('esp-score-b').classList.toggle('active', d.currentTeam===1);
-      document.getElementById('esp-round').textContent = d.round;
-
-      const num = document.getElementById('esp-timer-num');
-      num.textContent = left;
-      num.classList.toggle('urgent', left<=10);
-      const ring = document.getElementById('esp-ring-fg');
-      ring.style.strokeDashoffset = (2*Math.PI*70)*(1-left/d.timerSecs);
-      ring.style.stroke = left<=10?'#e84f4f':left<=20?'#f39c12':'#2ecc71';
-
-      const badge = document.getElementById('esp-status');
-      const estados = { idle:'⏳ Esperando turno', playing:'🟢 Ronda en curso', ended:'⏰ Fin del turno' };
-      badge.textContent = estados[d.phase]||'';
-      badge.className = 'status-badge '+(d.phase==='playing'?'playing':d.phase==='ended'?'ended':'waiting');
-    } catch(e){}
-  }
-
-  refGame.on('value', snap => { if(snap.val()) syncEsp(snap.val()); });
-  setInterval(() => { refGame.once('value').then(s => { if(s.val()) syncEsp(s.val()); }); }, 1000);
-}
-
-// =============================================
-// COORDINADOR: escuchar acciones del juez via Firebase
-// =============================================
-let coordListening = false;
-function startCoordListener() {
-  if (coordListening) return;
-  coordListening = true;
+// ================================================
+// ESCUCHAR ACCIONES DEL JUEZ (coordinador)
+// ================================================
+function escucharAccionesJuez() {
   refAction.on('value', snap => {
     const d = snap.val();
     if (!d) return;
-    if (Date.now() - d.ts > 4000) return; // ignorar acciones viejas
+    if (Date.now()-d.ts > 4000) return;
     if (!document.getElementById('screen-juego').classList.contains('active')) return;
-    // Limpiar para no procesar dos veces
     refAction.remove();
-    if (d.action === 'correcto') accionCorrecto();
-    else if (d.action === 'tabu') accionTabu();
+    if (d.action==='correcto') accionCorrecto();
+    else if (d.action==='tabu') accionTabu();
   });
 }
 
-// =============================================
-// PANTALLA FINAL
-// =============================================
-function mostrarFinal() {
-  const tied = G.teams[0].score === G.teams[1].score;
-  const w = G.teams[0].score >= G.teams[1].score ? 0 : 1;
-  document.getElementById('final-winner').textContent = tied ? '🤝 ¡Empate!' : `🎉 ¡Ganó ${G.teams[w].name}!`;
-  document.getElementById('final-scores').innerHTML = G.teams.map((t,i) => {
+// ================================================
+// RESULTADO JUGADOR
+// ================================================
+function mostrarResultadoJugador(d) {
+  // Los jugadores ven una pantalla simple de espera entre rondas
+  const msg = document.getElementById('espera-turno-msg');
+  if (document.getElementById('screen-espera').classList.contains('active')) {
+    msg.style.display = 'block';
+    msg.textContent = `📊 Ronda ${d.round} terminada. Azules: ${d.scores[0]} - Rojos: ${d.scores[1]}`;
+  }
+}
+
+// ================================================
+// FINAL
+// ================================================
+function mostrarFinal(d) {
+  const datos = d || { scores:[G.teams[0].score,G.teams[1].score], names:[G.teams[0].name,G.teams[1].name] };
+  const tied = datos.scores[0]===datos.scores[1];
+  const w = datos.scores[0]>=datos.scores[1]?0:1;
+  document.getElementById('final-winner').textContent = tied ? '🤝 ¡Empate!' : `🎉 ¡Ganó ${datos.names[w]}!`;
+  document.getElementById('final-scores').innerHTML = datos.names.map((n,i) => {
     const win = !tied && i===w;
-    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${t.name}</div><div class="fs-pts">${t.score}</div><div style="font-size:.75rem;opacity:.7">puntos</div></div>`;
+    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${n}</div><div class="fs-pts">${datos.scores[i]}</div><div style="font-size:.72rem;opacity:.7">puntos</div></div>`;
   }).join('');
+
+  refGame.update({ phase:'final', scores:datos.scores, names:datos.names });
   showScreen('screen-final');
   setTimeout(confetti, 300);
 }
 
-// =============================================
-// INICIO
-// =============================================
+// ================================================
+// ARRANQUE
+// ================================================
 showScreen('screen-bienvenida');
 </script>
 
@@ -1054,6 +1188,5 @@ const CARTAS_EMBEBIDAS = [
 ];
 
 </script>
-
 </body>
 </html>
