@@ -7,1128 +7,938 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Righteous&display=swap');
 :root {
-  --azul:#1a1f5e;--azul-med:#2d35a8;--azul-claro:#4f5fe8;
-  --acento:#f7c948;--rojo:#e84f4f;--verde:#2ecc71;
-  --bg:#0e1240;--sombra:0 8px 32px rgba(0,0,0,0.3);
+  --azul:#1a1f5e; --azul-med:#2d35a8; --azul-claro:#4f5fe8;
+  --acento:#f7c948; --rojo:#e84f4f; --verde:#2ecc71; --bg:#0e1240;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(77,95,232,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(247,201,72,.08) 0%,transparent 50%);pointer-events:none;z-index:0;}
-.screen{display:none;min-height:100vh;position:relative;z-index:1;}
-.screen.active{display:flex;flex-direction:column;}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Nunito',sans-serif; background:var(--bg); min-height:100vh; }
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at 20% 50%,rgba(77,95,232,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(247,201,72,.08) 0%,transparent 50%); pointer-events:none; z-index:0; }
 
-/* INICIO */
-#screen-inicio{align-items:center;justify-content:center;padding:2rem;text-align:center;gap:1.5rem;}
-.logo-title{font-family:'Righteous',cursive;font-size:clamp(3rem,10vw,6rem);color:var(--acento);text-shadow:0 4px 20px rgba(247,201,72,.4);line-height:1;}
-.logo-sub{font-size:clamp(.9rem,3vw,1.3rem);color:rgba(255,255,255,.7);font-weight:600;letter-spacing:.3em;text-transform:uppercase;margin-top:.3rem;}
-.brain-icon{font-size:4rem;animation:pulse-icon 2s ease-in-out infinite;}
-@keyframes pulse-icon{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-.config-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:2rem;width:100%;max-width:520px;backdrop-filter:blur(10px);}
-.config-card h2{color:white;font-size:1.1rem;margin-bottom:1.5rem;font-weight:800;}
-.upload-zone{border:2px dashed rgba(79,95,232,.6);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all .3s;background:rgba(79,95,232,.05);margin-bottom:1.2rem;}
-.upload-zone:hover,.upload-zone.drag-over{border-color:var(--acento);background:rgba(247,201,72,.08);}
-.upload-zone input{display:none;}
-.upload-icon{font-size:2rem;margin-bottom:.4rem;}
-.upload-text{color:rgba(255,255,255,.7);font-size:.9rem;line-height:1.5;}
-.upload-text strong{color:var(--acento);}
-.cards-count{display:none;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.3);border-radius:12px;padding:.6rem 1rem;color:#2ecc71;font-weight:700;font-size:.9rem;margin-bottom:1.2rem;text-align:center;}
-.timer-select{display:flex;gap:.6rem;margin-bottom:1.2rem;justify-content:center;}
-.timer-btn{flex:1;padding:.6rem;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:transparent;color:rgba(255,255,255,.6);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;}
-.timer-btn.active{border-color:var(--acento);color:var(--acento);background:rgba(247,201,72,.1);}
-.team-names{display:flex;gap:1rem;margin-bottom:1.2rem;}
-.team-input-wrap{flex:1;display:flex;flex-direction:column;gap:.3rem;}
-.team-input-wrap label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);}
-.team-input-wrap:first-child label{color:#4f9ef0;}
-.team-input-wrap:last-child label{color:#f07a4f;}
-.team-input-wrap input{padding:.55rem .8rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:white;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;outline:none;transition:border .2s;}
-.team-input-wrap input:focus{border-color:var(--acento);}
-.btn-primary{width:100%;padding:.9rem 2rem;border-radius:14px;border:none;background:linear-gradient(135deg,var(--azul-claro),#7b5cf0);color:white;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:800;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(79,95,232,.4);}
-.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 30px rgba(79,95,232,.6);}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+.screen { display:none; min-height:100vh; position:relative; z-index:1; }
+.screen.active { display:flex; flex-direction:column; }
 
-/* JUEGO - layout */
-#screen-juego{flex-direction:row;overflow:hidden;height:100vh;}
-.panel-publico{width:40%;background:linear-gradient(160deg,#0a0f35,#121852);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;border-right:1px solid rgba(255,255,255,.06);gap:1.2rem;position:relative;}
-.panel-publico::before{content:'📺 PANTALLA COMPARTIDA';position:absolute;top:.7rem;left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:800;letter-spacing:.15em;color:rgba(255,255,255,.2);white-space:nowrap;}
-.panel-presentador{width:60%;background:#f8f9ff;display:flex;flex-direction:column;overflow-y:auto;}
+/* ===== BIENVENIDA ===== */
+#screen-bienvenida { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
+.logo-title { font-family:'Righteous',cursive; font-size:clamp(3rem,10vw,5.5rem); color:var(--acento); text-shadow:0 4px 20px rgba(247,201,72,.4); line-height:1; }
+.logo-sub { font-size:1rem; color:rgba(255,255,255,.6); font-weight:700; letter-spacing:.3em; text-transform:uppercase; margin-top:.3rem; }
+.brain-icon { font-size:4rem; animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+
+.role-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:1.8rem; width:100%; max-width:380px; backdrop-filter:blur(10px); }
+.role-card h2 { color:white; font-size:1.1rem; margin-bottom:1.2rem; font-weight:800; }
+.btn-role { display:flex; align-items:center; gap:.9rem; padding:.9rem 1.1rem; border-radius:14px; border:1.5px solid rgba(255,255,255,.1); background:rgba(255,255,255,.05); color:white; font-family:'Nunito',sans-serif; cursor:pointer; transition:all .2s; width:100%; margin-bottom:.7rem; }
+.btn-role:last-child { margin-bottom:0; }
+.btn-role:hover { transform:translateY(-2px); border-color:var(--acento); background:rgba(247,201,72,.08); }
+.btn-role .role-icon { font-size:1.6rem; }
+.btn-role .role-info { text-align:left; }
+.btn-role .role-name { font-size:1rem; font-weight:800; display:block; }
+.btn-role .role-desc { font-size:.75rem; color:rgba(255,255,255,.5); font-weight:600; }
+
+/* ===== PIN ===== */
+#screen-pin { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
+.pin-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:2rem; width:100%; max-width:320px; }
+.pin-card h2 { color:white; font-size:1.1rem; margin-bottom:1.2rem; font-weight:800; }
+.pin-input { text-align:center; font-size:2rem; letter-spacing:.5em; padding:.7rem; width:100%; border-radius:12px; border:2px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:white; font-family:'Nunito',sans-serif; outline:none; margin-bottom:.8rem; }
+.pin-input:focus { border-color:var(--acento); }
+.pin-error { color:var(--rojo); font-size:.85rem; font-weight:700; margin-bottom:.8rem; display:none; }
+
+/* ===== SETUP (coordinador) ===== */
+#screen-setup { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
+.setup-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:2rem; width:100%; max-width:480px; }
+.setup-card h2 { color:white; font-size:1.1rem; margin-bottom:1.5rem; font-weight:800; }
+.upload-zone { border:2px dashed rgba(79,95,232,.6); border-radius:16px; padding:1.5rem; cursor:pointer; transition:all .3s; background:rgba(79,95,232,.05); margin-bottom:1rem; }
+.upload-zone:hover { border-color:var(--acento); background:rgba(247,201,72,.08); }
+.upload-zone input { display:none; }
+.upload-icon { font-size:2rem; margin-bottom:.3rem; }
+.upload-text { color:rgba(255,255,255,.7); font-size:.85rem; line-height:1.5; }
+.upload-text strong { color:var(--acento); }
+.cards-ok { background:rgba(46,204,113,.15); border:1px solid rgba(46,204,113,.3); border-radius:10px; padding:.5rem 1rem; color:#2ecc71; font-weight:700; font-size:.85rem; margin-bottom:1rem; text-align:center; }
+.field-label { color:rgba(255,255,255,.5); font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.4rem; }
+.timer-select { display:flex; gap:.5rem; margin-bottom:1rem; }
+.timer-btn { flex:1; padding:.55rem; border:2px solid rgba(255,255,255,.15); border-radius:10px; background:transparent; color:rgba(255,255,255,.5); font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.timer-btn.active { border-color:var(--acento); color:var(--acento); background:rgba(247,201,72,.1); }
+.team-names { display:flex; gap:.8rem; margin-bottom:1.2rem; }
+.team-wrap { flex:1; display:flex; flex-direction:column; gap:.3rem; }
+.team-wrap label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; }
+.team-wrap:first-child label { color:#4f9ef0; }
+.team-wrap:last-child label { color:#f07a4f; }
+.team-wrap input { padding:.55rem .7rem; border-radius:10px; border:1.5px solid rgba(255,255,255,.12); background:rgba(255,255,255,.07); color:white; font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:700; outline:none; transition:border .2s; }
+.team-wrap input:focus { border-color:var(--acento); }
+
+/* ===== BOTONES GENERALES ===== */
+.btn-primary { width:100%; padding:.9rem; border-radius:14px; border:none; background:linear-gradient(135deg,var(--azul-claro),#7b5cf0); color:white; font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:800; cursor:pointer; transition:all .3s; box-shadow:0 4px 20px rgba(79,95,232,.4); }
+.btn-primary:hover:not(:disabled) { transform:translateY(-2px); }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+.btn-back { background:transparent; border:none; color:rgba(255,255,255,.4); font-family:'Nunito',sans-serif; font-size:.85rem; cursor:pointer; margin-top:.5rem; width:100%; padding:.5rem; }
+
+/* ===== JUEGO - COORDINADOR ===== */
+#screen-juego { flex-direction:row; overflow:hidden; height:100vh; }
+.panel-publico { width:40%; background:linear-gradient(160deg,#0a0f35,#121852); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; border-right:1px solid rgba(255,255,255,.06); gap:1.2rem; position:relative; }
+.panel-publico::before { content:'📺 PANTALLA COMPARTIDA'; position:absolute; top:.7rem; left:50%; transform:translateX(-50%); font-size:.6rem; font-weight:800; letter-spacing:.15em; color:rgba(255,255,255,.2); white-space:nowrap; }
+.panel-coord { width:60%; background:#f8f9ff; display:flex; flex-direction:column; overflow-y:auto; }
 
 /* Marcador */
-.scoreboard{display:flex;gap:.8rem;width:100%;}
-.score-team{flex:1;border-radius:14px;padding:.7rem .5rem;text-align:center;transition:all .4s;position:relative;overflow:hidden;}
-.score-team.team-a{background:linear-gradient(135deg,#1a4a8f,#2460b8);border:2px solid transparent;}
-.score-team.team-b{background:linear-gradient(135deg,#8f1a1a,#b82424);border:2px solid transparent;}
-.score-team.active{border-color:var(--acento);box-shadow:0 0 20px rgba(247,201,72,.3);}
-.score-team.active::after{content:'▶ TURNO';position:absolute;bottom:.25rem;left:50%;transform:translateX(-50%);font-size:.5rem;font-weight:800;letter-spacing:.15em;color:var(--acento);}
-.score-name{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.7);margin-bottom:.2rem;}
-.score-pts{font-family:'Righteous',cursive;font-size:2.6rem;color:white;line-height:1;}
+.scoreboard { display:flex; gap:.8rem; width:100%; }
+.score-team { flex:1; border-radius:14px; padding:.7rem .5rem; text-align:center; transition:all .4s; position:relative; overflow:hidden; }
+.score-team.team-a { background:linear-gradient(135deg,#1a4a8f,#2460b8); border:2px solid transparent; }
+.score-team.team-b { background:linear-gradient(135deg,#8f1a1a,#b82424); border:2px solid transparent; }
+.score-team.active { border-color:var(--acento); box-shadow:0 0 20px rgba(247,201,72,.3); }
+.score-team.active::after { content:'▶ TURNO'; position:absolute; bottom:.25rem; left:50%; transform:translateX(-50%); font-size:.5rem; font-weight:800; letter-spacing:.15em; color:var(--acento); }
+.score-name { font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.7); margin-bottom:.2rem; }
+.score-pts { font-family:'Righteous',cursive; font-size:2.6rem; color:white; line-height:1; }
 
 /* Timer */
-.timer-public{position:relative;display:flex;align-items:center;justify-content:center;}
-.timer-ring{width:150px;height:150px;}
-.timer-ring circle{fill:none;stroke-width:8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1s linear,stroke .5s;}
-.timer-ring .bg-ring{stroke:rgba(255,255,255,.08);}
-.timer-ring .fg-ring{stroke:var(--verde);stroke-dasharray:440;stroke-dashoffset:0;}
-.timer-number{position:absolute;font-family:'Righteous',cursive;font-size:2.8rem;color:white;}
-.timer-number.urgent{color:var(--rojo);animation:blink .5s infinite;}
-@keyframes blink{50%{opacity:.5;}}
-.round-info{text-align:center;color:rgba(255,255,255,.5);font-size:.75rem;font-weight:600;letter-spacing:.1em;}
-.round-info span{color:var(--acento);font-weight:800;}
-.status-indicator{padding:.5rem 1.2rem;border-radius:50px;font-size:.95rem;font-weight:800;letter-spacing:.05em;text-align:center;}
-.status-indicator.playing{background:rgba(46,204,113,.2);color:#2ecc71;border:1.5px solid rgba(46,204,113,.4);}
-.status-indicator.waiting{background:rgba(247,201,72,.15);color:var(--acento);border:1.5px solid rgba(247,201,72,.3);}
-.status-indicator.finished{background:rgba(232,79,79,.15);color:var(--rojo);border:1.5px solid rgba(232,79,79,.4);}
-.confetti-area{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
-.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards;}
-@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+.timer-public { position:relative; display:flex; align-items:center; justify-content:center; }
+.timer-ring { width:150px; height:150px; }
+.timer-ring circle { fill:none; stroke-width:8; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dashoffset 1s linear, stroke .5s; }
+.timer-ring .bg-ring { stroke:rgba(255,255,255,.08); }
+.timer-ring .fg-ring { stroke:var(--verde); stroke-dasharray:440; stroke-dashoffset:0; }
+.timer-number { position:absolute; font-family:'Righteous',cursive; font-size:2.8rem; color:white; }
+.timer-number.urgent { color:var(--rojo); animation:blink .5s infinite; }
+@keyframes blink { 50%{opacity:.5;} }
+.round-info { text-align:center; color:rgba(255,255,255,.5); font-size:.75rem; font-weight:600; letter-spacing:.1em; }
+.round-info span { color:var(--acento); font-weight:800; }
+.status-badge { padding:.5rem 1.2rem; border-radius:50px; font-size:.9rem; font-weight:800; }
+.status-badge.playing { background:rgba(46,204,113,.2); color:#2ecc71; border:1.5px solid rgba(46,204,113,.4); }
+.status-badge.waiting { background:rgba(247,201,72,.15); color:var(--acento); border:1.5px solid rgba(247,201,72,.3); }
+.status-badge.ended { background:rgba(232,79,79,.15); color:var(--rojo); border:1.5px solid rgba(232,79,79,.4); }
 
-/* Panel presentador */
-.presenter-header{background:linear-gradient(135deg,var(--azul),var(--azul-med));padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
-.presenter-header h3{color:white;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
-.presenter-header .badge{background:var(--acento);color:var(--azul);padding:.2rem .6rem;border-radius:50px;font-size:.65rem;font-weight:800;}
-.card-display{flex:1;display:flex;flex-direction:column;align-items:center;padding:1.2rem;gap:1rem;}
-.card-image-wrap{width:100%;max-width:360px;border-radius:18px;overflow:hidden;box-shadow:var(--sombra);background:#e8eaf8;aspect-ratio:1;position:relative;}
-.card-image-wrap img{width:100%;height:100%;object-fit:contain;display:block;}
-.card-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;color:#8890cc;font-size:.95rem;font-weight:600;text-align:center;padding:2rem;}
-.card-counter{font-size:.75rem;color:#8890cc;font-weight:700;}
-
-/* Accesos panel */
-.access-panel{background:white;border:1.5px solid #e8eaf8;border-radius:16px;padding:1rem 1.2rem;width:100%;max-width:380px;}
-.access-panel h4{font-size:.75rem;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;}
-.access-row{display:flex;align-items:center;gap:.8rem;padding:.5rem 0;border-bottom:1px solid #f0f1fb;}
-.access-row:last-child{border-bottom:none;}
-.access-role{font-size:.8rem;font-weight:800;color:var(--azul);min-width:80px;}
-.access-status{font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:50px;}
-.access-status.libre{background:rgba(46,204,113,.15);color:#27ae60;}
-.access-status.ocupado{background:rgba(232,79,79,.15);color:var(--rojo);}
-.access-btn{margin-left:auto;padding:.3rem .7rem;border-radius:8px;border:none;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--azul-med),var(--azul-claro));color:white;white-space:nowrap;}
-.access-url{font-size:.65rem;color:var(--azul-claro);font-weight:700;word-break:break-all;margin-top:.15rem;}
+/* Panel coord */
+.coord-header { background:linear-gradient(135deg,var(--azul),var(--azul-med)); padding:.7rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+.coord-header h3 { color:white; font-size:.8rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.badge-priv { background:var(--acento); color:var(--azul); padding:.2rem .6rem; border-radius:50px; font-size:.65rem; font-weight:800; }
+.card-area { flex:1; display:flex; flex-direction:column; align-items:center; padding:1.2rem; gap:1rem; }
+.card-wrap { width:100%; max-width:340px; border-radius:18px; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.3); background:#e8eaf8; aspect-ratio:1; }
+.card-wrap img { width:100%; height:100%; object-fit:contain; display:block; }
+.card-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; color:#8890cc; font-size:.9rem; font-weight:600; text-align:center; padding:1.5rem; }
+.card-counter { font-size:.75rem; color:#8890cc; font-weight:700; }
 
 /* Controles */
-.controls{padding:.8rem 1.2rem 1.2rem;display:flex;flex-direction:column;gap:.7rem;background:white;border-top:1px solid #eef0fb;}
-.controls-row{display:flex;gap:.7rem;}
-.btn-game{flex:1;padding:.8rem;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.3rem;}
-.btn-game:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.1);}
-.btn-game:disabled{opacity:.4;cursor:not-allowed;}
-.btn-siguiente{background:linear-gradient(135deg,var(--azul-med),var(--azul-claro));color:white;box-shadow:0 4px 15px rgba(79,95,232,.3);}
-.btn-cambio{background:linear-gradient(135deg,#8e44ad,#9b59b6);color:white;}
-.btn-pausa{background:linear-gradient(135deg,#546e7a,#78909c);color:white;}
-.btn-danger{background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;}
-.btn-start-round{width:100%;padding:1rem;font-size:1.1rem;background:linear-gradient(135deg,var(--azul-claro),#7b5cf0);color:white;box-shadow:0 4px 20px rgba(79,95,232,.4);}
+.controls { padding:.8rem 1.2rem 1.2rem; display:flex; flex-direction:column; gap:.7rem; background:white; border-top:1px solid #eef0fb; }
+.controls-row { display:flex; gap:.7rem; }
+.btn-ctrl { flex:1; padding:.8rem; border-radius:12px; border:none; font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:800; cursor:pointer; transition:all .2s; }
+.btn-ctrl:hover:not(:disabled) { transform:translateY(-2px); filter:brightness(1.1); }
+.btn-ctrl:disabled { opacity:.4; cursor:not-allowed; }
+.btn-correcto { background:linear-gradient(135deg,#27ae60,#2ecc71); color:white; }
+.btn-tabu { background:linear-gradient(135deg,#c0392b,#e74c3c); color:white; }
+.btn-iniciar { background:linear-gradient(135deg,var(--azul-claro),#7b5cf0); color:white; box-shadow:0 4px 15px rgba(79,95,232,.3); width:100%; padding:.95rem; font-size:1.05rem; }
+.btn-pausa { background:linear-gradient(135deg,#546e7a,#78909c); color:white; }
+.btn-cambio { background:linear-gradient(135deg,#8e44ad,#9b59b6); color:white; width:100%; padding:.85rem; }
+.btn-menu { background:linear-gradient(135deg,#c0392b,#e74c3c); color:white; font-size:.8rem; padding:.55rem; }
 
-/* VISTA MÓVIL */
-#screen-movil{align-items:center;justify-content:center;padding:1.5rem;min-height:100vh;}
-.movil-wrap{width:100%;max-width:400px;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);}
-.movil-header{padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
-.movil-header.jugador{background:linear-gradient(135deg,#1a4a8f,#2460b8);}
-.movil-header.juez{background:linear-gradient(135deg,#6d1a8f,#9b2fb8);}
-.movil-header h2{color:white;font-family:'Righteous',cursive;font-size:1.2rem;}
-.movil-timer-badge{background:var(--acento);color:var(--azul);padding:.3rem .8rem;border-radius:50px;font-family:'Righteous',cursive;font-size:1.2rem;font-weight:700;}
-.movil-timer-badge.urgent{background:var(--rojo);color:white;animation:blink .5s infinite;}
-.movil-progress{height:5px;background:#e8eaf8;}
-.movil-progress-bar{height:100%;background:linear-gradient(90deg,var(--verde),var(--acento));transition:width 1s linear;}
-.movil-progress-bar.urgent{background:var(--rojo);}
-.movil-card-img{width:100%;aspect-ratio:1;background:#f0f1f8;object-fit:contain;display:block;}
-.movil-card-placeholder{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#8890cc;background:#f0f1f8;text-align:center;padding:2rem;font-weight:600;}
-.movil-actions{padding:1rem;display:flex;gap:.8rem;background:white;}
-.btn-movil{flex:1;padding:.9rem;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .2s;}
-.btn-movil:active{transform:scale(.97);}
-.btn-movil.correcto{background:linear-gradient(135deg,#27ae60,#2ecc71);color:white;box-shadow:0 4px 15px rgba(46,204,113,.4);}
-.btn-movil.tabu{background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;box-shadow:0 4px 15px rgba(232,79,79,.4);}
-.movil-footer{padding:.7rem 1rem;text-align:center;font-size:.75rem;color:#8890cc;font-weight:600;background:white;}
+/* ===== VISTA MÓVIL (jugador/juez) ===== */
+#screen-movil { align-items:center; justify-content:center; padding:1.5rem; min-height:100vh; }
+.movil-wrap { width:100%; max-width:400px; border-radius:24px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+.movil-hdr { padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+.movil-hdr.jugador { background:linear-gradient(135deg,#1a4a8f,#2460b8); }
+.movil-hdr.juez { background:linear-gradient(135deg,#6d1a8f,#9b2fb8); }
+.movil-hdr h2 { color:white; font-family:'Righteous',cursive; font-size:1.2rem; }
+.movil-timer { background:var(--acento); color:var(--azul); padding:.3rem .8rem; border-radius:50px; font-family:'Righteous',cursive; font-size:1.2rem; font-weight:700; }
+.movil-timer.urgent { background:var(--rojo); color:white; animation:blink .5s infinite; }
+.movil-progress { height:5px; background:#e8eaf8; }
+.movil-bar { height:100%; background:linear-gradient(90deg,var(--verde),var(--acento)); transition:width 1s linear; }
+.movil-bar.urgent { background:var(--rojo); }
+.movil-img { width:100%; aspect-ratio:1; background:#f0f1f8; object-fit:contain; display:block; }
+.movil-waiting { width:100%; aspect-ratio:1; background:#f0f1f8; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; color:#8890cc; font-weight:600; font-size:.9rem; text-align:center; padding:2rem; }
+.movil-waiting .w-icon { font-size:3rem; }
+.movil-actions { display:none; padding:1rem; gap:.8rem; background:white; }
+.movil-actions.visible { display:flex; }
+.btn-movil { flex:1; padding:.9rem; border-radius:12px; border:none; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:800; cursor:pointer; transition:all .2s; }
+.btn-movil:active { transform:scale(.97); }
+.btn-movil:disabled { opacity:.4; }
+.btn-mcorrecto { background:linear-gradient(135deg,#27ae60,#2ecc71); color:white; }
+.btn-mtabu { background:linear-gradient(135deg,#c0392b,#e74c3c); color:white; }
+.movil-footer { padding:.7rem 1rem; text-align:center; font-size:.75rem; color:#8890cc; font-weight:600; background:white; }
 
-/* SALA LLENA */
-#screen-lleno{align-items:center;justify-content:center;padding:2rem;text-align:center;gap:1.5rem;}
-.lleno-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:2.5rem 2rem;max-width:400px;width:100%;}
-.lleno-icon{font-size:4rem;margin-bottom:1rem;}
-.lleno-title{font-family:'Righteous',cursive;font-size:2rem;color:white;margin-bottom:.5rem;}
-.lleno-desc{color:rgba(255,255,255,.6);font-size:1rem;}
+/* ===== ESPECTADOR ===== */
+#screen-espectador { flex-direction:column; align-items:center; justify-content:center; padding:2rem; gap:1.5rem; background:linear-gradient(160deg,#0a0f35,#121852); }
 
-/* ENTRETURNO */
-#screen-entreturno{align-items:center;justify-content:center;padding:2rem;gap:1.5rem;text-align:center;}
-.entreturno-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:2rem;max-width:480px;width:100%;}
-.entreturno-icon{font-size:3.5rem;margin-bottom:.8rem;}
-.entreturno-title{font-family:'Righteous',cursive;font-size:1.8rem;color:white;margin-bottom:.4rem;}
-.entreturno-desc{color:rgba(255,255,255,.6);font-size:.95rem;margin-bottom:1.2rem;}
-.result-mini{display:flex;gap:.8rem;margin-bottom:1.2rem;}
-.result-mini-team{flex:1;border-radius:12px;padding:.8rem;text-align:center;}
-.result-mini-team.a{background:rgba(26,74,143,.4);border:1.5px solid rgba(70,120,220,.4);}
-.result-mini-team.b{background:rgba(143,26,26,.4);border:1.5px solid rgba(220,70,70,.4);}
-.result-mini-name{font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.1em;}
-.result-mini-pts{font-family:'Righteous',cursive;font-size:2.2rem;color:white;}
+/* ===== ENTRETURNO ===== */
+#screen-entreturno { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; }
+.et-card { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:24px; padding:2rem; max-width:440px; width:100%; }
+.et-icon { font-size:3.5rem; margin-bottom:.8rem; }
+.et-title { font-family:'Righteous',cursive; font-size:1.8rem; color:white; margin-bottom:.4rem; }
+.et-desc { color:rgba(255,255,255,.6); font-size:.95rem; margin-bottom:1.2rem; }
+.result-mini { display:flex; gap:.8rem; margin-bottom:1.2rem; }
+.rm-team { flex:1; border-radius:12px; padding:.8rem; text-align:center; }
+.rm-team.a { background:rgba(26,74,143,.4); border:1.5px solid rgba(70,120,220,.4); }
+.rm-team.b { background:rgba(143,26,26,.4); border:1.5px solid rgba(220,70,70,.4); }
+.rm-name { font-size:.7rem; font-weight:800; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.1em; }
+.rm-pts { font-family:'Righteous',cursive; font-size:2.2rem; color:white; }
 
-/* FINAL */
-#screen-final{align-items:center;justify-content:center;padding:2rem;gap:1.5rem;text-align:center;overflow-y:auto;}
-.final-trophy{font-size:5rem;animation:bounce 1s ease-in-out infinite;}
-@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-15px);}}
-.final-title{font-family:'Righteous',cursive;font-size:clamp(2rem,6vw,3.5rem);color:var(--acento);text-shadow:0 4px 20px rgba(247,201,72,.4);}
-.final-winner{color:white;font-size:1.2rem;font-weight:700;}
-.final-scores{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;}
-.final-score-card{border-radius:20px;padding:1.5rem 2rem;min-width:160px;text-align:center;}
-.final-score-card.winner{background:linear-gradient(135deg,#b8860b,var(--acento));color:var(--azul);box-shadow:0 8px 30px rgba(247,201,72,.4);}
-.final-score-card.loser{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);color:white;}
-.final-score-name{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;}
-.final-score-pts{font-family:'Righteous',cursive;font-size:3.5rem;line-height:1;}
+/* ===== FINAL ===== */
+#screen-final { align-items:center; justify-content:center; padding:2rem; gap:1.5rem; text-align:center; overflow-y:auto; }
+.trophy { font-size:5rem; animation:bounce 1s ease-in-out infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-15px);} }
+.final-title { font-family:'Righteous',cursive; font-size:clamp(2rem,6vw,3.5rem); color:var(--acento); }
+.final-winner { color:white; font-size:1.2rem; font-weight:700; }
+.final-scores { display:flex; gap:1.2rem; flex-wrap:wrap; justify-content:center; }
+.fs-card { border-radius:20px; padding:1.5rem 2rem; min-width:160px; text-align:center; }
+.fs-card.winner { background:linear-gradient(135deg,#b8860b,var(--acento)); color:var(--azul); }
+.fs-card.loser { background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.15); color:white; }
+.fs-name { font-size:.85rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.4rem; }
+.fs-pts { font-family:'Righteous',cursive; font-size:3.5rem; line-height:1; }
 
-/* TOASTS */
-#toast-container{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none;}
-.toast{padding:.7rem 1.4rem;border-radius:50px;font-weight:800;font-size:.95rem;color:white;text-align:center;animation:toastIn .3s ease both,toastOut .3s 1.7s ease both;white-space:nowrap;}
-.toast.success{background:linear-gradient(135deg,#27ae60,#2ecc71);}
-.toast.error{background:linear-gradient(135deg,#c0392b,#e74c3c);}
-.toast.info{background:linear-gradient(135deg,var(--azul-med),var(--azul-claro));}
-@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.9);}to{opacity:1;transform:translateY(0) scale(1);}}
-@keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateY(-10px);}}
-.score-change{animation:scorePop .5s ease both;}
-@keyframes scorePop{0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);}}
+/* ===== TOASTS ===== */
+#toasts { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:.5rem; pointer-events:none; }
+.toast { padding:.7rem 1.4rem; border-radius:50px; font-weight:800; font-size:.9rem; color:white; text-align:center; animation:tin .3s ease both, tout .3s 1.7s ease both; white-space:nowrap; }
+.toast.ok { background:linear-gradient(135deg,#27ae60,#2ecc71); }
+.toast.err { background:linear-gradient(135deg,#c0392b,#e74c3c); }
+.toast.info { background:linear-gradient(135deg,var(--azul-med),var(--azul-claro)); }
+@keyframes tin { from{opacity:0;transform:translateY(20px) scale(.9);} to{opacity:1;transform:translateY(0) scale(1);} }
+@keyframes tout { from{opacity:1;} to{opacity:0;transform:translateY(-10px);} }
+.score-pop { animation:spop .5s ease both; }
+@keyframes spop { 0%{transform:scale(1);} 50%{transform:scale(1.3);} 100%{transform:scale(1);} }
 
-/* BOTONES DE ROL */
-.btn-role {
-  display:flex;flex-direction:column;align-items:flex-start;
-  padding:.9rem 1.2rem;border-radius:14px;border:1.5px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.06);color:white;font-family:'Nunito',sans-serif;
-  cursor:pointer;transition:all .2s;text-align:left;gap:.1rem;
-}
-.btn-role:hover{transform:translateY(-2px);border-color:var(--acento);background:rgba(247,201,72,.08);}
-.btn-role span{font-size:1.05rem;font-weight:800;}
-.btn-role small{font-size:.75rem;color:rgba(255,255,255,.5);font-weight:600;}
-.btn-role.jugador:hover{border-color:#4f9ef0;background:rgba(79,158,240,.08);}
-.btn-role.juez:hover{border-color:#9b59b6;background:rgba(155,89,182,.08);}
-.btn-role.espectador:hover{border-color:#2ecc71;background:rgba(46,204,113,.08);}
+/* Confetti */
+.confetti-area { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.cp { position:absolute; width:8px; height:8px; border-radius:2px; animation:cfall linear forwards; }
+@keyframes cfall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1;} 100%{transform:translateY(110vh) rotate(720deg);opacity:0;} }
 
-/* OVERLAY PAUSA */
-#overlay-pausa{display:none;position:fixed;inset:0;background:rgba(10,15,53,.92);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:2rem;backdrop-filter:blur(8px);}
-#overlay-pausa.active{display:flex;}
-#overlay-pausa h2{font-family:'Righteous',cursive;font-size:3rem;color:var(--acento);}
-#overlay-pausa p{color:rgba(255,255,255,.6);}
+/* Pausa overlay */
+#overlay-pausa { display:none; position:fixed; inset:0; background:rgba(10,15,53,.92); z-index:100; align-items:center; justify-content:center; flex-direction:column; gap:2rem; backdrop-filter:blur(8px); }
+#overlay-pausa.on { display:flex; }
+#overlay-pausa h2 { font-family:'Righteous',cursive; font-size:3rem; color:var(--acento); }
 
-@media(max-width:768px){
-  #screen-juego{flex-direction:column;height:auto;overflow-y:auto;}
-  .panel-publico{width:100%;height:auto;padding:1rem;}
-  .panel-presentador{width:100%;}
+@media(max-width:768px) {
+  #screen-juego { flex-direction:column; height:auto; overflow-y:auto; }
+  .panel-publico,.panel-coord { width:100%; }
 }
 </style>
 </head>
 <body>
 
-<!-- BIENVENIDA: selección de rol -->
+<!-- BIENVENIDA -->
 <div id="screen-bienvenida" class="screen active">
-  <div>
-    <div class="brain-icon">🧠</div>
-    <div class="logo-title">TABÚ</div>
-    <div class="logo-sub">Neuroanatomía</div>
-  </div>
-  <div class="config-card" style="max-width:400px">
+  <div><div class="brain-icon">🧠</div><div class="logo-title">TABÚ</div><div class="logo-sub">Neuroanatomía</div></div>
+  <div class="role-card">
     <h2>👋 ¿Con qué rol entrás?</h2>
-    <div style="display:flex;flex-direction:column;gap:.8rem">
-      <button class="btn-role" onclick="selectRole('coordinador')">
-        🎮 <span>Coordinador</span>
-        <small>Configurá y manejá el juego</small>
-      </button>
-      <button class="btn-role jugador" onclick="selectRole('jugador')">
-        🗣️ <span>Jugador</span>
-        <small>Describís la carta a tu equipo</small>
-      </button>
-      <button class="btn-role juez" onclick="selectRole('juez')">
-        ⚖️ <span>Juez</span>
-        <small>Controlás que no digan palabras prohibidas</small>
-      </button>
-      <button class="btn-role espectador" onclick="selectRole('espectador')">
-        👥 <span>Espectador</span>
-        <small>Solo ves el puntaje y el cronómetro</small>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- PIN coordinador -->
-<div id="screen-pin" class="screen">
-  <div>
-    <div class="brain-icon">🔐</div>
-    <div class="logo-title" style="font-size:3rem">PIN</div>
-    <div class="logo-sub">Coordinador</div>
-  </div>
-  <div class="config-card" style="max-width:340px">
-    <h2>🔒 Ingresá el PIN</h2>
-    <div style="display:flex;gap:.6rem;justify-content:center;margin-bottom:1rem">
-      <input type="password" id="pin-input" maxlength="4" placeholder="····"
-        style="text-align:center;font-size:2rem;letter-spacing:.5em;padding:.6rem;width:140px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:white;font-family:Nunito,sans-serif;outline:none;">
-    </div>
-    <div id="pin-error" style="color:#e84f4f;font-size:.85rem;font-weight:700;text-align:center;margin-bottom:.8rem;display:none">
-      ❌ PIN incorrecto
-    </div>
-    <button class="btn-primary" onclick="checkPin()">Entrar</button>
-    <button onclick="showScreen('screen-bienvenida')"
-      style="width:100%;margin-top:.6rem;padding:.6rem;border:none;background:transparent;color:rgba(255,255,255,.4);font-family:Nunito,sans-serif;font-size:.85rem;cursor:pointer">
-      ← Volver
+    <button class="btn-role" onclick="elegirRol('coordinador')">
+      <span class="role-icon">🎮</span>
+      <span class="role-info"><span class="role-name">Coordinador</span><span class="role-desc">Configurá y manejá el juego</span></span>
+    </button>
+    <button class="btn-role" onclick="elegirRol('jugador')">
+      <span class="role-icon">🗣️</span>
+      <span class="role-info"><span class="role-name">Jugador</span><span class="role-desc">Describís la carta a tu equipo</span></span>
+    </button>
+    <button class="btn-role" onclick="elegirRol('juez')">
+      <span class="role-icon">⚖️</span>
+      <span class="role-info"><span class="role-name">Juez</span><span class="role-desc">Controlás las palabras prohibidas</span></span>
+    </button>
+    <button class="btn-role" onclick="elegirRol('espectador')">
+      <span class="role-icon">👥</span>
+      <span class="role-info"><span class="role-name">Espectador</span><span class="role-desc">Ves el puntaje y cronómetro</span></span>
     </button>
   </div>
 </div>
 
-<!-- INICIO (configuración, solo coordinador) -->
-<div id="screen-inicio" class="screen">
-  <div>
-    <div class="brain-icon">🧠</div>
-    <div class="logo-title">TABÚ</div>
-    <div class="logo-sub">Neuroanatomía</div>
+<!-- PIN -->
+<div id="screen-pin" class="screen">
+  <div><div class="brain-icon">🔐</div><div class="logo-title" style="font-size:3rem">PIN</div></div>
+  <div class="pin-card">
+    <h2>🔒 PIN del Coordinador</h2>
+    <input type="password" id="pin-input" class="pin-input" maxlength="4" placeholder="····">
+    <div id="pin-error" class="pin-error">❌ PIN incorrecto</div>
+    <button class="btn-primary" onclick="verificarPin()">Entrar</button>
+    <button class="btn-back" onclick="showScreen('screen-bienvenida')">← Volver</button>
   </div>
-  <div class="config-card">
+</div>
+
+<!-- SETUP -->
+<div id="screen-setup" class="screen">
+  <div><div class="brain-icon">🧠</div><div class="logo-title">TABÚ</div></div>
+  <div class="setup-card">
     <h2>⚙️ Configurar partida</h2>
     <div class="upload-zone" id="upload-zone">
       <input type="file" id="file-input" accept="image/*" multiple>
       <div class="upload-icon">🃏</div>
-      <div class="upload-text">
-        <strong>Las 23 cartas ya están cargadas ✅</strong><br>
-        O hacé clic para reemplazarlas con tus imágenes<br>
-        <small style="opacity:.6">(PNG/JPG)</small>
-      </div>
+      <div class="upload-text"><strong>Las 23 cartas ya están cargadas ✅</strong><br>O hacé clic para usar tus propias imágenes</div>
     </div>
-    <div class="cards-count" id="cards-count">✅ <span id="cards-num">23</span> cartas listas</div>
-    <div style="color:rgba(255,255,255,.6);font-size:.75rem;font-weight:700;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;">⏱ Tiempo por turno</div>
+    <div class="cards-ok" id="cards-ok">✅ <span id="cards-num">23</span> cartas listas</div>
+    <div class="field-label">⏱ Tiempo por turno</div>
     <div class="timer-select">
-      <button class="timer-btn" data-seconds="30">30s</button>
-      <button class="timer-btn active" data-seconds="45">45s</button>
-      <button class="timer-btn" data-seconds="60">60s</button>
+      <button class="timer-btn" data-s="30">30s</button>
+      <button class="timer-btn active" data-s="45">45s</button>
+      <button class="timer-btn" data-s="60">60s</button>
     </div>
-    <div style="color:rgba(255,255,255,.6);font-size:.75rem;font-weight:700;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;">🏆 Equipos</div>
+    <div class="field-label">🏆 Nombres de equipos</div>
     <div class="team-names">
-      <div class="team-input-wrap">
-        <label>Equipo A</label>
-        <input type="text" id="team-a-name" placeholder="Azules" maxlength="12">
-      </div>
-      <div class="team-input-wrap">
-        <label>Equipo B</label>
-        <input type="text" id="team-b-name" placeholder="Rojos" maxlength="12">
-      </div>
+      <div class="team-wrap"><label>Equipo A</label><input type="text" id="nombre-a" placeholder="Azules" maxlength="12"></div>
+      <div class="team-wrap"><label>Equipo B</label><input type="text" id="nombre-b" placeholder="Rojos" maxlength="12"></div>
     </div>
     <button class="btn-primary" id="btn-comenzar">🚀 ¡Comenzar juego!</button>
   </div>
 </div>
 
-<!-- JUEGO -->
+<!-- JUEGO (coordinador) -->
 <div id="screen-juego" class="screen">
   <div class="panel-publico">
     <div class="confetti-area" id="confetti-area"></div>
     <div class="scoreboard">
-      <div class="score-team team-a" id="score-team-a">
-        <div class="score-name" id="pub-name-a">AZULES</div>
-        <div class="score-pts" id="pub-score-a">0</div>
-      </div>
-      <div class="score-team team-b" id="score-team-b">
-        <div class="score-name" id="pub-name-b">ROJOS</div>
-        <div class="score-pts" id="pub-score-b">0</div>
-      </div>
+      <div class="score-team team-a" id="score-a"><div class="score-name" id="pub-nom-a">AZULES</div><div class="score-pts" id="pub-pts-a">0</div></div>
+      <div class="score-team team-b" id="score-b"><div class="score-name" id="pub-nom-b">ROJOS</div><div class="score-pts" id="pub-pts-b">0</div></div>
     </div>
     <div class="timer-public">
       <svg class="timer-ring" viewBox="0 0 160 160">
         <circle class="bg-ring" cx="80" cy="80" r="70"/>
-        <circle class="fg-ring" id="timer-ring-fg" cx="80" cy="80" r="70"/>
+        <circle class="fg-ring" id="ring-fg" cx="80" cy="80" r="70"/>
       </svg>
-      <div class="timer-number" id="timer-public-num">--</div>
+      <div class="timer-number" id="timer-num">--</div>
     </div>
-    <div class="status-indicator waiting" id="status-indicator">⏳ Esperando turno</div>
-    <div class="round-info">Ronda <span id="round-num">1</span> · Carta <span id="card-num">-</span>/<span id="card-total">-</span></div>
+    <div class="status-badge waiting" id="status-badge">⏳ Esperando turno</div>
+    <div class="round-info">Ronda <span id="round-num">1</span> · Carta <span id="card-num">-</span>/<span id="card-tot">-</span></div>
   </div>
 
-  <div class="panel-presentador">
-    <div class="presenter-header">
-      <h3>🎮 Panel del Coordinador</h3>
-      <div class="badge">PRIVADO</div>
+  <div class="panel-coord">
+    <div class="coord-header">
+      <h3>🎮 Coordinador</h3>
+      <div class="badge-priv">PRIVADO</div>
     </div>
-    <div class="card-display">
-      <div class="card-image-wrap">
-        <img id="card-img" src="" alt="" style="display:none">
-        <div class="card-placeholder" id="card-placeholder">
-          <div style="font-size:2.5rem">🃏</div>
-          <div>Presioná <strong>"Iniciar turno"</strong><br>para ver la primera carta</div>
-        </div>
+    <div class="card-area">
+      <div class="card-wrap">
+        <img id="coord-img" src="" alt="" style="display:none">
+        <div class="card-placeholder" id="coord-ph"><div style="font-size:2.5rem">🃏</div><div>Presioná <strong>"Iniciar turno"</strong></div></div>
       </div>
       <div class="card-counter" id="card-counter"></div>
-
-      <!-- Panel de accesos -->
-      <div class="access-panel">
-        <h4>📱 Accesos del turno</h4>
-        <div class="access-row">
-          <div>
-            <div class="access-role">🗣️ Jugador</div>
-            <div class="access-url" id="url-jugador"></div>
-          </div>
-          <div class="access-status libre" id="status-jugador">Libre</div>
-          <button class="access-btn" id="btn-open-jugador" onclick="openRole('jugador')">Abrir</button>
-        </div>
-        <div class="access-row">
-          <div>
-            <div class="access-role">⚖️ Juez</div>
-            <div class="access-url" id="url-juez"></div>
-          </div>
-          <div class="access-status libre" id="status-juez">Libre</div>
-          <button class="access-btn" id="btn-open-juez" onclick="openRole('juez')">Abrir</button>
-        </div>
-        <div style="font-size:.68rem;color:#aab0d0;margin-top:.5rem;text-align:center;" id="access-hint">
-          Abrí cada vista en el celular del participante, o enviá el link
-        </div>
-      </div>
     </div>
-
     <div class="controls">
-      <button class="btn-game btn-start-round" id="btn-start-round">▶ Iniciar turno</button>
-      <div class="controls-row" id="game-controls-2" style="display:none">
-        <button class="btn-game btn-siguiente" id="btn-siguiente">➡ Siguiente carta</button>
-        <button class="btn-game btn-pausa" id="btn-pausa">⏸ Pausa</button>
+      <!-- Estado: idle -->
+      <div id="ctrl-idle">
+        <button class="btn-ctrl btn-iniciar" id="btn-iniciar">▶ Iniciar turno</button>
       </div>
-      <div id="end-turn-area" style="display:none">
-        <button class="btn-game btn-cambio" style="width:100%;padding:.8rem" id="btn-cambio-equipo">🔄 Cambiar equipo</button>
+      <!-- Estado: playing -->
+      <div id="ctrl-playing" style="display:none">
+        <div class="controls-row" style="margin-bottom:.7rem">
+          <button class="btn-ctrl btn-correcto" id="btn-correcto">✅ Correcto</button>
+          <button class="btn-ctrl btn-tabu" id="btn-tabu">🚫 Tabú</button>
+        </div>
+        <div class="controls-row">
+          <button class="btn-ctrl btn-pausa" id="btn-pausa">⏸ Pausa</button>
+        </div>
       </div>
-      <div class="controls-row">
-        <button class="btn-game btn-danger" id="btn-reiniciar" style="font-size:.8rem;padding:.55rem">🔙 Menú</button>
+      <!-- Estado: ended -->
+      <div id="ctrl-ended" style="display:none">
+        <button class="btn-ctrl btn-cambio" id="btn-cambio">🔄 Cambiar equipo y continuar</button>
+      </div>
+      <div class="controls-row" style="margin-top:.4rem">
+        <button class="btn-ctrl btn-menu" id="btn-menu">🔙 Menú</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ENTRETURNO -->
-<div id="screen-entreturno" class="screen">
-  <div class="entreturno-card">
-    <div class="entreturno-icon">🔄</div>
-    <div class="entreturno-title">Fin del turno</div>
-    <div class="entreturno-desc" id="entreturno-desc">Preparate para el próximo equipo</div>
-    <div class="result-mini">
-      <div class="result-mini-team a"><div class="result-mini-name" id="et-name-a">AZULES</div><div class="result-mini-pts" id="et-score-a">0</div></div>
-      <div class="result-mini-team b"><div class="result-mini-name" id="et-name-b">ROJOS</div><div class="result-mini-pts" id="et-score-b">0</div></div>
-    </div>
-    <button class="btn-primary" id="btn-continuar-turno">▶ Continuar con el siguiente equipo</button>
-  </div>
-</div>
-
-<!-- FINAL -->
-<div id="screen-final" class="screen">
-  <div class="final-trophy">🏆</div>
-  <div class="final-title">¡Juego terminado!</div>
-  <div class="final-winner" id="final-winner"></div>
-  <div class="final-scores" id="final-scores"></div>
-  <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:1rem">
-    <button class="btn-primary" id="btn-jugar-de-nuevo" style="max-width:200px">🔄 Jugar de nuevo</button>
-    <button class="btn-primary" id="btn-volver-menu" style="max-width:200px;background:rgba(255,255,255,.1);box-shadow:none">🏠 Menú</button>
-  </div>
-</div>
-
-<!-- VISTA MÓVIL (jugador / juez) -->
+<!-- VISTA MÓVIL (jugador/juez) -->
 <div id="screen-movil" class="screen">
-  <div class="movil-wrap" id="movil-wrap">
-    <div class="movil-header jugador" id="movil-header">
-      <h2 id="movil-role-title">🗣️ Tu carta</h2>
-      <div class="movil-timer-badge" id="movil-timer">--</div>
+  <div class="movil-wrap">
+    <div class="movil-hdr jugador" id="movil-hdr">
+      <h2 id="movil-title">🗣️ Tu carta</h2>
+      <div class="movil-timer" id="movil-timer">--</div>
     </div>
-    <div class="movil-progress"><div class="movil-progress-bar" id="movil-progress-bar"></div></div>
-    <img id="movil-card-img" class="movil-card-img" src="" alt="" style="display:none">
-    <div class="movil-card-placeholder" id="movil-card-placeholder">Esperando que el coordinador inicie el turno...</div>
-    <div class="movil-actions" id="movil-actions" style="display:none">
-      <button class="btn-movil correcto" id="btn-movil-correcto">✅ Correcto</button>
-      <button class="btn-movil tabu" id="btn-movil-tabu">🚫 Tabú</button>
+    <div class="movil-progress"><div class="movil-bar" id="movil-bar"></div></div>
+    <img id="movil-img" class="movil-img" src="" alt="" style="display:none">
+    <div class="movil-waiting" id="movil-waiting">
+      <div class="w-icon">⏳</div>
+      <div>Esperando que el coordinador<br>inicie el turno...</div>
+    </div>
+    <div class="movil-actions" id="movil-actions">
+      <button class="btn-movil btn-mcorrecto" id="btn-mcorrecto" disabled>✅ Correcto</button>
+      <button class="btn-movil btn-mtabu" id="btn-mtabu" disabled>🚫 Tabú</button>
     </div>
     <div class="movil-footer" id="movil-footer">¡Describí sin decir las palabras de la carta!</div>
   </div>
 </div>
 
-<!-- SALA LLENA -->
-<div id="screen-lleno" class="screen">
-  <div class="lleno-card">
-    <div class="lleno-icon">🚫</div>
-    <div class="lleno-title">Sala llena</div>
-    <div class="lleno-desc" id="lleno-desc">Ya hay alguien con este rol en este turno. Esperá a que el coordinador libere los accesos.</div>
+<!-- ESPECTADOR -->
+<div id="screen-espectador" class="screen">
+  <div class="confetti-area" id="confetti-esp"></div>
+  <div class="scoreboard" style="max-width:400px;width:100%">
+    <div class="score-team team-a" id="esp-score-a"><div class="score-name" id="esp-nom-a">AZULES</div><div class="score-pts" id="esp-pts-a">0</div></div>
+    <div class="score-team team-b" id="esp-score-b"><div class="score-name" id="esp-nom-b">ROJOS</div><div class="score-pts" id="esp-pts-b">0</div></div>
+  </div>
+  <div class="timer-public">
+    <svg class="timer-ring" viewBox="0 0 160 160">
+      <circle class="bg-ring" cx="80" cy="80" r="70"/>
+      <circle class="fg-ring" id="esp-ring-fg" cx="80" cy="80" r="70"/>
+    </svg>
+    <div class="timer-number" id="esp-timer-num">--</div>
+  </div>
+  <div class="status-badge waiting" id="esp-status">⏳ Esperando turno</div>
+  <div class="round-info" style="color:rgba(255,255,255,.5)">Ronda <span id="esp-round">1</span></div>
+</div>
+
+<!-- ENTRETURNO -->
+<div id="screen-entreturno" class="screen">
+  <div class="et-card">
+    <div class="et-icon">🔄</div>
+    <div class="et-title">Fin del turno</div>
+    <div class="et-desc" id="et-desc">Preparate para el próximo equipo</div>
+    <div class="result-mini">
+      <div class="rm-team a"><div class="rm-name" id="et-nom-a">AZULES</div><div class="rm-pts" id="et-pts-a">0</div></div>
+      <div class="rm-team b"><div class="rm-name" id="et-nom-b">ROJOS</div><div class="rm-pts" id="et-pts-b">0</div></div>
+    </div>
+    <button class="btn-primary" id="btn-continuar">▶ Continuar con el siguiente equipo</button>
+  </div>
+</div>
+
+<!-- FINAL -->
+<div id="screen-final" class="screen">
+  <div class="trophy">🏆</div>
+  <div class="final-title">¡Juego terminado!</div>
+  <div class="final-winner" id="final-winner"></div>
+  <div class="final-scores" id="final-scores"></div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:1rem">
+    <button class="btn-primary" id="btn-de-nuevo" style="max-width:200px">🔄 Jugar de nuevo</button>
+    <button class="btn-primary" id="btn-al-menu" style="max-width:200px;background:rgba(255,255,255,.1);box-shadow:none">🏠 Menú</button>
   </div>
 </div>
 
 <!-- PAUSA -->
 <div id="overlay-pausa">
   <h2>⏸ PAUSA</h2>
-  <p>El juego está pausado</p>
+  <p style="color:rgba(255,255,255,.6)">El juego está pausado</p>
   <button class="btn-primary" id="btn-reanudar" style="max-width:200px">▶ Reanudar</button>
 </div>
 
-<div id="toast-container"></div>
+<div id="toasts"></div>
 
 <script>
-// ============ ESTADO ============
-const state = {
+// =============================================
+// ESTADO GLOBAL
+// =============================================
+const G = {
   cards: [],
   deck: [],
-  deckIndex: 0,
-  currentCard: null,
+  deckIdx: 0,
+  currentCardIdx: -1,   // índice en deck de la carta actual
   teams: [{ name:'AZULES', score:0 }, { name:'ROJOS', score:0 }],
   currentTeam: 0,
-  timerSeconds: 45,
+  timerSecs: 45,
   timerLeft: 45,
   timerInterval: null,
-  timerRunning: false,
+  running: false,
   paused: false,
   round: 1,
   turnScore: 0,
+  gamePhase: 'idle',    // idle | playing | ended
 };
 
-// Slots de acceso: null = libre, 'ocupado' = tomado
-const slots = { jugador: false, juez: false };
+const PIN = '1234';
 
-// ============ PANTALLAS ============
+// =============================================
+// localStorage keys
+// =============================================
+const LS = {
+  GAME: 'tabu_game',       // estado completo del juego (coordinador → todos)
+  ACTION: 'tabu_action',   // acción del juez → coordinador
+};
+
+// =============================================
+// UTILIDADES
+// =============================================
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ============ CARGA DE ARCHIVOS ============
-const uploadZone = document.getElementById('upload-zone');
-const fileInput  = document.getElementById('file-input');
-
-uploadZone.addEventListener('click', () => fileInput.click());
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); handleFiles([...e.dataTransfer.files]); });
-fileInput.addEventListener('change', () => handleFiles([...fileInput.files]));
-
-function handleFiles(files) {
-  const imgs = files.filter(f => f.type.startsWith('image/'));
-  if (!imgs.length) { showToast('No se encontraron imágenes', 'error'); return; }
-  state.cards = [];
-  let loaded = 0;
-  imgs.forEach(file => {
-    const r = new FileReader();
-    r.onload = e => {
-      state.cards.push({ name: file.name, dataUrl: e.target.result });
-      if (++loaded === imgs.length) {
-        document.getElementById('cards-num').textContent = state.cards.length;
-        document.getElementById('cards-count').style.display = 'block';
-        showToast(`✅ ${state.cards.length} cartas cargadas`, 'success');
-      }
-    };
-    r.readAsDataURL(file);
-  });
-}
-
-document.querySelectorAll('.timer-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    state.timerSeconds = parseInt(btn.dataset.seconds);
-  });
-});
-
-document.getElementById('team-a-name').addEventListener('input', e => { state.teams[0].name = e.target.value.trim().toUpperCase() || 'AZULES'; });
-document.getElementById('team-b-name').addEventListener('input', e => { state.teams[1].name = e.target.value.trim().toUpperCase() || 'ROJOS'; });
-
-document.getElementById('btn-comenzar').addEventListener('click', () => {
-  if (state.cards.length === 0 && CARTAS_EMBEBIDAS.length > 0) state.cards = CARTAS_EMBEBIDAS;
-  if (!state.cards.length) return;
-  initGame();
-  showScreen('screen-juego');
-});
-
-// ============ INIT ============
-function shuffle(arr) {
-  for (let i = arr.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-  return arr;
-}
-
-function initGame() {
-  state.deck = shuffle([...state.cards]);
-  state.deckIndex = 0;
-  state.currentCard = null;
-  state.teams[0].score = 0;
-  state.teams[1].score = 0;
-  state.currentTeam = 0;
-  state.round = 1;
-  state.timerLeft = state.timerSeconds;
-  state.timerRunning = false;
-  state.paused = false;
-  state.turnScore = 0;
-  slots.jugador = false;
-  slots.juez = false;
-
-  clearLS();
-  updatePublicUI();
-  updateTimerUI(state.timerSeconds);
-  setCardPlaceholder();
-  showGameControls('idle');
-  updateActiveTeam();
-
-  document.getElementById('pub-name-a').textContent = state.teams[0].name;
-  document.getElementById('pub-name-b').textContent = state.teams[1].name;
-  document.getElementById('card-total').textContent = state.cards.length;
-  document.getElementById('card-num').textContent = '-';
-  document.getElementById('round-num').textContent = state.round;
-  setStatusIndicator('waiting');
-  updateAccessPanel();
-}
-
-// ============ TURNO ============
-document.getElementById('btn-start-round').addEventListener('click', startTurn);
-
-function startTurn() {
-  state.turnScore = 0;
-  state.timerLeft = state.timerSeconds;
-  state.paused = false;
-  nextCard();
-  startTimer();
-  showGameControls('playing');
-  setStatusIndicator('playing');
-  updateActiveTeam();
-  showToast(`Turno del equipo ${state.teams[state.currentTeam].name}`, 'info');
-  broadcastState();
-}
-
-function nextCard() {
-  if (state.deckIndex >= state.deck.length) {
-    state.deck = shuffle([...state.cards]);
-    state.deckIndex = 0;
-    state.round++;
-    document.getElementById('round-num').textContent = state.round;
-    showToast('🔄 Nuevo mazo barajado', 'info');
-  }
-  state.currentCard = state.deck[state.deckIndex++];
-  document.getElementById('card-num').textContent = state.deckIndex;
-  showCard(state.currentCard);
-  broadcastState();
-}
-
-function showCard(card) {
-  const img = document.getElementById('card-img');
-  img.src = card.dataUrl;
-  img.style.display = 'block';
-  document.getElementById('card-placeholder').style.display = 'none';
-  document.getElementById('card-counter').textContent = `Carta ${state.deckIndex} de ${state.deck.length}`;
-}
-
-function setCardPlaceholder() {
-  document.getElementById('card-img').style.display = 'none';
-  document.getElementById('card-placeholder').style.display = 'flex';
-  document.getElementById('card-counter').textContent = '';
-}
-
-// ============ CONTROLES COORDINADOR ============
-document.getElementById('btn-siguiente').addEventListener('click', () => {
-  if (!state.timerRunning) return;
-  nextCard();
-});
-
-document.getElementById('btn-pausa').addEventListener('click', togglePausa);
-document.getElementById('btn-reanudar').addEventListener('click', togglePausa);
-
-function togglePausa() {
-  state.paused = !state.paused;
-  document.getElementById('overlay-pausa').classList.toggle('active', state.paused);
-  if (state.paused) {
-    clearInterval(state.timerInterval);
-    state.timerRunning = false;
-  } else {
-    startTimerTick();
-  }
-  broadcastState();
-}
-
-document.getElementById('btn-cambio-equipo').addEventListener('click', () => {
-  clearInterval(state.timerInterval);
-  state.timerRunning = false;
-  state.currentTeam = state.currentTeam === 0 ? 1 : 0;
-  slots.jugador = false;
-  slots.juez = false;
-  showScreen('screen-entreturno');
-  updateEntreturnoUI();
-  broadcastState();
-});
-
-document.getElementById('btn-continuar-turno').addEventListener('click', () => {
-  showScreen('screen-juego');
-  resetForNewTurn();
-});
-
-document.getElementById('btn-reiniciar').addEventListener('click', () => {
-  clearInterval(state.timerInterval);
-  clearLS();
-  showScreen('screen-inicio');
-});
-
-document.getElementById('btn-jugar-de-nuevo').addEventListener('click', () => { initGame(); showScreen('screen-juego'); });
-document.getElementById('btn-volver-menu').addEventListener('click', () => { clearLS(); showScreen('screen-inicio'); });
-
-function resetForNewTurn() {
-  state.timerLeft = state.timerSeconds;
-  state.turnScore = 0;
-  state.paused = false;
-  clearInterval(state.timerInterval);
-  updateTimerUI(state.timerSeconds);
-  updateActiveTeam();
-  showGameControls('idle');
-  setStatusIndicator('waiting');
-  setCardPlaceholder();
-  updateAccessPanel();
-  broadcastState();
-}
-
-// ============ ACCIONES DEL JUEZ (desde móvil) ============
-// El juez envía su acción via localStorage, el coordinador la procesa
-function processJudgeAction(action) {
-  if (!state.timerRunning) return;
-  if (action === 'correcto') {
-    state.teams[state.currentTeam].score++;
-    state.turnScore++;
-    updatePublicUI(true);
-    showConfetti();
-    showToast(`✅ ¡Correcto! ${state.teams[state.currentTeam].name} +1`, 'success');
-    nextCard();
-    broadcastState();
-  } else if (action === 'tabu') {
-    clearInterval(state.timerInterval);
-    state.timerRunning = false;
-    setStatusIndicator('finished');
-    showGameControls('ended');
-    showToast(`🚫 ¡Tabú! Fin del turno para ${state.teams[state.currentTeam].name}`, 'error');
-    broadcastState();
-  }
-}
-
-// ============ TIMER ============
-function startTimer() {
-  clearInterval(state.timerInterval);
-  state.timerRunning = true;
-  startTimerTick();
-}
-
-function startTimerTick() {
-  state.timerRunning = true;
-  state.timerInterval = setInterval(() => {
-    if (state.paused) return;
-    state.timerLeft--;
-    updateTimerUI(state.timerLeft);
-    broadcastState();
-    if (state.timerLeft <= 0) {
-      clearInterval(state.timerInterval);
-      state.timerRunning = false;
-      onTimerEnd();
-    }
-  }, 1000);
-}
-
-function updateTimerUI(s) {
-  const num = document.getElementById('timer-public-num');
-  const ring = document.getElementById('timer-ring-fg');
-  const circ = 2 * Math.PI * 70;
-  num.textContent = s;
-  ring.style.strokeDashoffset = circ * (1 - s / state.timerSeconds);
-  const urgent = s <= 10;
-  num.classList.toggle('urgent', urgent);
-  ring.style.stroke = s <= 10 ? '#e84f4f' : s <= 20 ? '#f39c12' : '#2ecc71';
-}
-
-function onTimerEnd() {
-  playAlarm();
-  setStatusIndicator('finished');
-  showGameControls('ended');
-  showToast(`⏰ ¡Tiempo! ${state.teams[state.currentTeam].name} anotó ${state.turnScore} pts`, 'info');
-  broadcastState();
-}
-
-// ============ ALARMA ============
-function playAlarm() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [0,.15,.3,.45,.6,.75].forEach((t,i) => {
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.value = i%2===0 ? 880 : 660;
-      osc.type = 'square';
-      gain.gain.setValueAtTime(.3, ctx.currentTime+t);
-      gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime+t+.12);
-      osc.start(ctx.currentTime+t); osc.stop(ctx.currentTime+t+.15);
-    });
-  } catch(e) {}
-}
-
-// ============ UI HELPERS ============
-function updatePublicUI(animate) {
-  document.getElementById('pub-score-a').textContent = state.teams[0].score;
-  document.getElementById('pub-score-b').textContent = state.teams[1].score;
-  document.getElementById('pub-name-a').textContent = state.teams[0].name;
-  document.getElementById('pub-name-b').textContent = state.teams[1].name;
-  if (animate) {
-    const el = document.getElementById(state.currentTeam===0 ? 'pub-score-a' : 'pub-score-b');
-    el.classList.remove('score-change'); void el.offsetWidth; el.classList.add('score-change');
-  }
-}
-
-function updateActiveTeam() {
-  document.getElementById('score-team-a').classList.toggle('active', state.currentTeam===0);
-  document.getElementById('score-team-b').classList.toggle('active', state.currentTeam===1);
-}
-
-function setStatusIndicator(s) {
-  const el = document.getElementById('status-indicator');
-  el.className = 'status-indicator '+s;
-  el.textContent = { playing:'🟢 Ronda en curso', waiting:'⏳ Esperando turno', finished:'⏰ Fin del turno' }[s]||'';
-}
-
-function showGameControls(mode) {
-  document.getElementById('btn-start-round').style.display = mode==='idle' ? 'block' : 'none';
-  document.getElementById('game-controls-2').style.display = mode==='playing' ? 'flex' : 'none';
-  document.getElementById('end-turn-area').style.display = mode==='ended' ? 'block' : 'none';
-}
-
-function updateEntreturnoUI() {
-  document.getElementById('et-name-a').textContent = state.teams[0].name;
-  document.getElementById('et-name-b').textContent = state.teams[1].name;
-  document.getElementById('et-score-a').textContent = state.teams[0].score;
-  document.getElementById('et-score-b').textContent = state.teams[1].score;
-  document.getElementById('entreturno-desc').textContent =
-    `Le toca al equipo ${state.teams[state.currentTeam].name}. ¡Están listos?`;
-}
-
-function showConfetti() {
-  const area = document.getElementById('confetti-area');
-  const colors = ['#f7c948','#2ecc71','#4f5fe8','#e84f4f','#ffffff'];
-  for (let i=0; i<18; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    p.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${.8+Math.random()*1.2}s;animation-delay:${Math.random()*.3}s;`;
-    area.appendChild(p);
-    setTimeout(() => p.remove(), 2000);
-  }
-}
-
-function showToast(msg, type='info') {
-  const c = document.getElementById('toast-container');
+function toast(msg, type='info') {
+  const c = document.getElementById('toasts');
   const t = document.createElement('div');
   t.className = `toast ${type}`; t.textContent = msg;
   c.appendChild(t); setTimeout(() => t.remove(), 2100);
 }
 
-// ============ SISTEMA DE ACCESOS (localStorage) ============
-const LS_STATE = 'tabu_state';
-const LS_ROLE  = 'tabu_role';
-const LS_JUDGE_ACTION = 'tabu_judge_action';
-const LS_SLOTS = 'tabu_slots';
-
-function clearLS() {
-  [LS_STATE, LS_ROLE, LS_JUDGE_ACTION, LS_SLOTS].forEach(k => localStorage.removeItem(k));
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
 }
 
-function broadcastState() {
+// =============================================
+// PUBLICAR ESTADO (solo coordinador escribe)
+// =============================================
+function publish() {
+  const card = G.deck[G.currentCardIdx] || null;
   try {
-    localStorage.setItem(LS_STATE, JSON.stringify({
-      cardDataUrl: state.currentCard ? state.currentCard.dataUrl : null,
-      cardIndex: state.deckIndex,
-      timerLeft: state.timerLeft,
-      timerSeconds: state.timerSeconds,
-      timerRunning: state.timerRunning,
-      paused: state.paused,
-      timestamp: Date.now(),
-      teamName: state.teams[state.currentTeam].name,
-      scores: [state.teams[0].score, state.teams[1].score],
-      teamNames: [state.teams[0].name, state.teams[1].name],
+    localStorage.setItem(LS.GAME, JSON.stringify({
+      phase: G.gamePhase,
+      cardDataUrl: card ? card.dataUrl : null,
+      cardIdx: G.currentCardIdx,
+      deckIdx: G.deckIdx,
+      deckLen: G.deck.length,
+      timerLeft: G.timerLeft,
+      timerSecs: G.timerSecs,
+      running: G.running,
+      paused: G.paused,
+      round: G.round,
+      scores: [G.teams[0].score, G.teams[1].score],
+      names: [G.teams[0].name, G.teams[1].name],
+      currentTeam: G.currentTeam,
+      ts: Date.now(),
     }));
-    localStorage.setItem(LS_SLOTS, JSON.stringify(slots));
-  } catch(e) {}
+  } catch(e) { console.warn('publish failed', e); }
 }
 
-function updateAccessPanel() {
-  const isLocal = window.location.href.startsWith('file://') ||
-                  window.location.href.startsWith('about:') ||
-                  window.location.href.includes('srcdoc');
-
-  const base = isLocal ? null : window.location.href.split('?')[0];
-
-  ['jugador','juez'].forEach(role => {
-    const url = base ? `${base}?rol=${role}` : null;
-    const urlEl = document.getElementById(`url-${role}`);
-    const statusEl = document.getElementById(`status-${role}`);
-    const btnEl = document.getElementById(`btn-open-${role}`);
-
-    urlEl.textContent = url || '(archivo local)';
-    statusEl.textContent = slots[role] ? 'Ocupado' : 'Libre';
-    statusEl.className = 'access-status ' + (slots[role] ? 'ocupado' : 'libre');
-    btnEl.disabled = slots[role];
-  });
-
-  const hint = document.getElementById('access-hint');
-  hint.textContent = isLocal
-    ? 'Usá "Abrir" para abrir cada vista en una nueva pestaña del mismo navegador'
-    : 'Compartí el link o abrí cada vista en una nueva pestaña';
-}
-
-// Abrir rol en nueva pestaña (funciona local y en red)
-function openRole(role) {
-  if (slots[role]) { showToast(`Ya hay un ${role} conectado`, 'error'); return; }
-
-  const href = window.location.href;
-  const isLocal = href.startsWith('file://') || href.startsWith('about:') || href.includes('srcdoc');
-
-  if (isLocal) {
-    // Señal via localStorage para que la nueva pestaña sepa su rol
-    localStorage.setItem(LS_ROLE, role);
-    const htmlContent = document.documentElement.outerHTML;
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const win = window.open(url, '_blank');
-    if (!win) showToast('Permitir popups para abrir la vista', 'error');
-  } else {
-    const base = href.split('?')[0];
-    window.open(`${base}?rol=${role}`, '_blank');
-  }
-  // No marcar como ocupado todavía, lo hace el cliente cuando se conecta
-}
-
-// Escuchar acciones del juez y cambios de slots
-let lastJudgeAction = null;
-setInterval(() => {
-  // Solo en pantalla de juego
-  if (!document.getElementById('screen-juego').classList.contains('active')) return;
-
-  // Leer acción del juez
-  try {
-    const raw = localStorage.getItem(LS_JUDGE_ACTION);
-    if (raw && raw !== lastJudgeAction) {
-      lastJudgeAction = raw;
-      const { action, ts } = JSON.parse(raw);
-      if (Date.now() - ts < 3000) {
-        processJudgeAction(action);
-        localStorage.removeItem(LS_JUDGE_ACTION);
-      }
-    }
-  } catch(e) {}
-
-  // Leer slots
-  try {
-    const raw = localStorage.getItem(LS_SLOTS);
-    if (raw) {
-      const s = JSON.parse(raw);
-      // Solo actualizar si vino de una pestaña externa (no nosotros mismos)
-      // Detectamos si jugador/juez se conectaron
-      if (s.jugador !== slots.jugador || s.juez !== slots.juez) {
-        slots.jugador = s.jugador;
-        slots.juez = s.juez;
-        updateAccessPanel();
-      }
-    }
-  } catch(e) {}
-}, 300);
-
-// ============ VISTA MÓVIL ============
-function initMobileView(role) {
-  showScreen('screen-movil');
-
-  // Registrar slot
-  try {
-    const s = JSON.parse(localStorage.getItem(LS_SLOTS) || '{}');
-    if (s[role]) {
-      // Slot ocupado
-      showScreen('screen-lleno');
-      document.getElementById('lleno-desc').textContent =
-        `Ya hay alguien como "${role}" en este turno. Esperá que el coordinador libere el acceso.`;
-      return;
-    }
-    s[role] = true;
-    localStorage.setItem(LS_SLOTS, JSON.stringify(s));
-  } catch(e) {}
-
-  // Configurar UI según rol
-  const isJuez = role === 'juez';
-  const header = document.getElementById('movil-header');
-  header.className = `movil-header ${isJuez ? 'juez' : 'jugador'}`;
-  document.getElementById('movil-role-title').textContent = isJuez ? '⚖️ Vista Juez' : '🗣️ Tu carta';
-  document.getElementById('movil-footer').textContent = isJuez
-    ? 'Controlá que no digan palabras prohibidas'
-    : '¡Describí sin decir las palabras de la carta!';
-
-  if (isJuez) {
-    document.getElementById('movil-actions').style.display = 'flex';
-  }
-
-  // Botones del juez
-  document.getElementById('btn-movil-correcto').addEventListener('click', () => {
-    localStorage.setItem(LS_JUDGE_ACTION, JSON.stringify({ action:'correcto', ts:Date.now() }));
-    showToast('✅ Correcto enviado', 'success');
-  });
-  document.getElementById('btn-movil-tabu').addEventListener('click', () => {
-    localStorage.setItem(LS_JUDGE_ACTION, JSON.stringify({ action:'tabu', ts:Date.now() }));
-    showToast('🚫 Tabú enviado', 'error');
-  });
-
-  // Liberar slot al cerrar
-  window.addEventListener('beforeunload', () => {
-    try {
-      const s = JSON.parse(localStorage.getItem(LS_SLOTS) || '{}');
-      s[role] = false;
-      localStorage.setItem(LS_SLOTS, JSON.stringify(s));
-    } catch(e) {}
-  });
-
-  // Escuchar cambios de storage en tiempo real (cross-tab)
-  window.addEventListener('storage', (e) => {
-    if (e.key === LS_STATE) {
-      syncMobileFromStorage();
-    }
-  });
-
-  function syncMobileFromStorage() {
-    try {
-      const raw = localStorage.getItem(LS_STATE);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      const elapsed = (Date.now() - data.timestamp) / 1000;
-      const left = data.timerRunning ? Math.max(0, data.timerLeft - Math.floor(elapsed)) : data.timerLeft;
-
-      const timerEl = document.getElementById('movil-timer');
-      timerEl.textContent = left;
-      timerEl.classList.toggle('urgent', left <= 10);
-      const bar = document.getElementById('movil-progress-bar');
-      bar.style.width = (left / data.timerSeconds * 100) + '%';
-      bar.classList.toggle('urgent', left <= 10);
-
-      if (data.cardDataUrl) {
-        const img = document.getElementById('movil-card-img');
-        if (data.cardIndex !== img.dataset.cardIndex) {
-          img.dataset.cardIndex = data.cardIndex;
-          img.src = data.cardDataUrl;
-          img.style.display = 'block';
-          document.getElementById('movil-card-placeholder').style.display = 'none';
-        }
-      }
-
-      if (isJuez) {
-        const running = data.timerRunning && !data.paused;
-        document.getElementById('btn-movil-correcto').disabled = !running;
-        document.getElementById('btn-movil-tabu').disabled = !running;
-      }
-    } catch(e) {}
-  }
-
-  // Actualizar carta y timer continuamente (fallback polling)
-  setInterval(() => {
-    try {
-      const raw = localStorage.getItem(LS_STATE);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      const elapsed = (Date.now() - data.timestamp) / 1000;
-      const left = data.timerRunning ? Math.max(0, data.timerLeft - Math.floor(elapsed)) : data.timerLeft;
-
-      // Timer
-      const timerEl = document.getElementById('movil-timer');
-      timerEl.textContent = left;
-      timerEl.classList.toggle('urgent', left <= 10);
-      const bar = document.getElementById('movil-progress-bar');
-      bar.style.width = (left / data.timerSeconds * 100) + '%';
-      bar.classList.toggle('urgent', left <= 10);
-
-      // Carta
-      if (data.cardDataUrl) {
-        const img = document.getElementById('movil-card-img');
-        // Use cardIndex to detect changes, not full dataUrl comparison
-        if (data.cardIndex !== img.dataset.cardIndex) {
-          img.dataset.cardIndex = data.cardIndex;
-          img.src = data.cardDataUrl;
-          img.style.display = 'block';
-          document.getElementById('movil-card-placeholder').style.display = 'none';
-        }
-      }
-
-      // Botones juez: deshabilitar si no está corriendo
-      if (isJuez) {
-        const running = data.timerRunning && !data.paused;
-        document.getElementById('btn-movil-correcto').disabled = !running;
-        document.getElementById('btn-movil-tabu').disabled = !running;
-      }
-    } catch(e) {}
-  }, 500);
-}
-
-// ============ PANTALLA FINAL ============
-function showFinalScreen() {
-  const winner = state.teams[0].score >= state.teams[1].score ? 0 : 1;
-  const tied = state.teams[0].score === state.teams[1].score;
-  document.getElementById('final-winner').textContent = tied
-    ? '🤝 ¡Empate!'
-    : `🎉 ¡Ganó el equipo ${state.teams[winner].name}!`;
-  document.getElementById('final-scores').innerHTML = state.teams.map((t,i) => {
-    const w = !tied && i===winner;
-    return `<div class="final-score-card ${w?'winner':'loser'}">
-      <div style="font-size:2rem">${w?'👑':'🏅'}</div>
-      <div class="final-score-name">${t.name}</div>
-      <div class="final-score-pts">${t.score}</div>
-      <div style="font-size:.75rem;opacity:.7">puntos</div>
-    </div>`;
-  }).join('');
-  showScreen('screen-final');
-  setTimeout(showConfetti, 300);
-}
-
-// ============ ARRANQUE ============
-document.getElementById('cards-count').style.display = 'block';
-
-const COORDINATOR_PIN = '1234';
-
-function selectRole(role) {
-  if (role === 'coordinador') {
+// =============================================
+// SELECCIÓN DE ROL
+// =============================================
+function elegirRol(rol) {
+  if (rol === 'coordinador') {
     showScreen('screen-pin');
     setTimeout(() => document.getElementById('pin-input').focus(), 100);
-  } else if (role === 'jugador' || role === 'juez') {
-    initMobileView(role);
-  } else if (role === 'espectador') {
-    initEspectadorView();
+  } else if (rol === 'jugador' || rol === 'juez') {
+    initMobile(rol);
+  } else {
+    initEspectador();
   }
 }
 
-function checkPin() {
-  const val = document.getElementById('pin-input').value;
-  const err = document.getElementById('pin-error');
-  if (val === COORDINATOR_PIN) {
-    err.style.display = 'none';
-    showScreen('screen-inicio');
+function verificarPin() {
+  const v = document.getElementById('pin-input').value;
+  if (v === PIN) {
+    document.getElementById('pin-error').style.display = 'none';
+    showScreen('screen-setup');
   } else {
-    err.style.display = 'block';
+    document.getElementById('pin-error').style.display = 'block';
     document.getElementById('pin-input').value = '';
     document.getElementById('pin-input').focus();
   }
 }
+document.getElementById('pin-input').addEventListener('keydown', e => { if(e.key==='Enter') verificarPin(); });
 
-// Enter en el input del PIN
-document.getElementById('pin-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkPin();
-});
+// =============================================
+// CARGA DE CARTAS
+// =============================================
+const uploadZone = document.getElementById('upload-zone');
+const fileInput  = document.getElementById('file-input');
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor='var(--acento)'; });
+uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor=''; });
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.style.borderColor=''; loadFiles([...e.dataTransfer.files]); });
+fileInput.addEventListener('change', () => loadFiles([...fileInput.files]));
 
-function initEspectadorView() {
-  // El espectador ve solo la pantalla pública (panel izquierdo)
-  // Mostramos screen-juego pero ocultamos el panel del presentador
-  showScreen('screen-juego');
-  const panel = document.querySelector('.panel-presentador');
-  if (panel) panel.style.display = 'none';
-  const pub = document.querySelector('.panel-publico');
-  if (pub) { pub.style.width = '100%'; pub.style.borderRight = 'none'; }
-
-  // Sincronizar desde localStorage igual que el móvil
-  setInterval(() => {
-    try {
-      const raw = localStorage.getItem(LS_STATE);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      const elapsed = (Date.now() - data.timestamp) / 1000;
-      const left = data.timerRunning ? Math.max(0, data.timerLeft - Math.floor(elapsed)) : data.timerLeft;
-      updateTimerUI(left);
-      if (data.teamNames) {
-        state.teams[0].name = data.teamNames[0];
-        state.teams[1].name = data.teamNames[1];
+function loadFiles(files) {
+  const imgs = files.filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) { toast('No se encontraron imágenes', 'err'); return; }
+  G.cards = []; let done = 0;
+  imgs.forEach(f => {
+    const r = new FileReader();
+    r.onload = e => {
+      G.cards.push({ name:f.name, dataUrl:e.target.result });
+      if (++done === imgs.length) {
+        document.getElementById('cards-num').textContent = G.cards.length;
+        toast(`✅ ${G.cards.length} cartas cargadas`, 'ok');
       }
-      if (data.scores) {
-        state.teams[0].score = data.scores[0];
-        state.teams[1].score = data.scores[1];
-      }
-      updatePublicUI();
-    } catch(e) {}
-  }, 500);
+    };
+    r.readAsDataURL(f);
+  });
 }
 
-// Siempre arrancar en bienvenida
+document.querySelectorAll('.timer-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.timer-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    G.timerSecs = parseInt(b.dataset.s);
+  });
+});
+document.getElementById('nombre-a').addEventListener('input', e => G.teams[0].name = e.target.value.trim().toUpperCase() || 'AZULES');
+document.getElementById('nombre-b').addEventListener('input', e => G.teams[1].name = e.target.value.trim().toUpperCase() || 'ROJOS');
+
+document.getElementById('btn-comenzar').addEventListener('click', () => {
+  if (G.cards.length === 0) G.cards = CARTAS_EMBEBIDAS;
+  iniciarJuego();
+});
+
+// =============================================
+// LÓGICA COORDINADOR
+// =============================================
+function iniciarJuego() {
+  G.deck = shuffle(G.cards);
+  G.deckIdx = 0;
+  G.currentCardIdx = -1;
+  G.teams[0].score = 0; G.teams[1].score = 0;
+  G.currentTeam = 0;
+  G.round = 1;
+  G.timerLeft = G.timerSecs;
+  G.running = false;
+  G.paused = false;
+  G.turnScore = 0;
+  G.gamePhase = 'idle';
+
+  // Publicar estado inicial (sin carta) para que jugador/juez vean "esperando"
+  publish();
+  renderCoord();
+  showScreen('screen-juego');
+}
+
+document.getElementById('btn-iniciar').addEventListener('click', iniciarTurno);
+document.getElementById('btn-correcto').addEventListener('click', accionCorrecto);
+document.getElementById('btn-tabu').addEventListener('click', accionTabu);
+document.getElementById('btn-pausa').addEventListener('click', togglePausa);
+document.getElementById('btn-reanudar').addEventListener('click', togglePausa);
+document.getElementById('btn-cambio').addEventListener('click', () => {
+  finalizarTurno();
+  showScreen('screen-entreturno');
+  renderEntreturno();
+});
+document.getElementById('btn-continuar').addEventListener('click', () => {
+  showScreen('screen-juego');
+  prepararNuevoTurno();
+});
+document.getElementById('btn-menu').addEventListener('click', () => {
+  clearInterval(G.timerInterval); G.running = false;
+  localStorage.removeItem(LS.GAME);
+  showScreen('screen-bienvenida');
+});
+document.getElementById('btn-de-nuevo').addEventListener('click', () => iniciarJuego());
+document.getElementById('btn-al-menu').addEventListener('click', () => { localStorage.removeItem(LS.GAME); showScreen('screen-bienvenida'); });
+
+function iniciarTurno() {
+  G.gamePhase = 'playing';
+  G.turnScore = 0;
+  G.timerLeft = G.timerSecs;
+  G.paused = false;
+  siguienteCarta();           // muestra la primera carta
+  startTimer();
+  renderCoord();
+  publish();                  // ← jugador y juez reciben la carta aquí
+}
+
+function siguienteCarta() {
+  if (G.deckIdx >= G.deck.length) {
+    G.deck = shuffle(G.cards);
+    G.deckIdx = 0;
+    G.round++;
+    toast('🔄 Nuevo mazo barajado', 'info');
+  }
+  G.currentCardIdx = G.deckIdx++;
+  renderCartaCoord();
+  publish();
+}
+
+function accionCorrecto() {
+  if (!G.running) return;
+  G.teams[G.currentTeam].score++;
+  G.turnScore++;
+  renderPublico(true);
+  confetti();
+  toast(`✅ Correcto! +1 punto`, 'ok');
+  siguienteCarta();
+}
+
+function accionTabu() {
+  if (!G.running) return;
+  clearInterval(G.timerInterval); G.running = false;
+  G.gamePhase = 'ended';
+  toast(`🚫 ¡Tabú! Fin del turno`, 'err');
+  renderCoord();
+  publish();
+}
+
+function togglePausa() {
+  G.paused = !G.paused;
+  document.getElementById('overlay-pausa').classList.toggle('on', G.paused);
+  if (G.paused) { clearInterval(G.timerInterval); G.running = false; }
+  else startTimerTick();
+  publish();
+}
+
+function finalizarTurno() {
+  clearInterval(G.timerInterval); G.running = false;
+  G.currentTeam = G.currentTeam === 0 ? 1 : 0;
+  G.gamePhase = 'idle';
+  publish();
+}
+
+function prepararNuevoTurno() {
+  G.timerLeft = G.timerSecs;
+  G.turnScore = 0;
+  G.currentCardIdx = -1;
+  G.paused = false;
+  G.gamePhase = 'idle';
+  renderCoord();
+  renderPublico();
+  publish();
+}
+
+// =============================================
+// TIMER
+// =============================================
+function startTimer() {
+  clearInterval(G.timerInterval);
+  G.running = true;
+  startTimerTick();
+}
+
+function startTimerTick() {
+  G.running = true;
+  G.timerInterval = setInterval(() => {
+    if (G.paused) return;
+    G.timerLeft--;
+    renderTimerPublico(G.timerLeft);
+    publish();
+    if (G.timerLeft <= 0) {
+      clearInterval(G.timerInterval); G.running = false;
+      G.gamePhase = 'ended';
+      playAlarm();
+      toast(`⏰ ¡Tiempo! ${G.teams[G.currentTeam].name} anotó ${G.turnScore} pts`, 'info');
+      renderCoord();
+      publish();
+    }
+  }, 1000);
+}
+
+function playAlarm() {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    [0,.15,.3,.45,.6,.75].forEach((t,i) => {
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=i%2===0?880:660; o.type='square';
+      g.gain.setValueAtTime(.3,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.12);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+.15);
+    });
+  } catch(e){}
+}
+
+// =============================================
+// RENDER COORDINADOR
+// =============================================
+function renderCoord() {
+  renderPublico();
+  renderCartaCoord();
+  // Controles
+  document.getElementById('ctrl-idle').style.display    = G.gamePhase==='idle'    ? 'block' : 'none';
+  document.getElementById('ctrl-playing').style.display = G.gamePhase==='playing' ? 'block' : 'none';
+  document.getElementById('ctrl-ended').style.display   = G.gamePhase==='ended'   ? 'block' : 'none';
+}
+
+function renderCartaCoord() {
+  const img = document.getElementById('coord-img');
+  const ph  = document.getElementById('coord-ph');
+  const card = G.deck[G.currentCardIdx];
+  if (card) {
+    img.src = card.dataUrl; img.style.display='block'; ph.style.display='none';
+    document.getElementById('card-counter').textContent = `Carta ${G.deckIdx} de ${G.deck.length}`;
+    document.getElementById('card-num').textContent = G.deckIdx;
+    document.getElementById('card-tot').textContent = G.deck.length;
+  } else {
+    img.style.display='none'; ph.style.display='flex';
+    document.getElementById('card-counter').textContent='';
+    document.getElementById('card-num').textContent='-';
+  }
+}
+
+function renderPublico(animate) {
+  document.getElementById('pub-nom-a').textContent = G.teams[0].name;
+  document.getElementById('pub-nom-b').textContent = G.teams[1].name;
+  const pA = document.getElementById('pub-pts-a');
+  const pB = document.getElementById('pub-pts-b');
+  pA.textContent = G.teams[0].score;
+  pB.textContent = G.teams[1].score;
+  if (animate) {
+    const el = G.currentTeam===0 ? pA : pB;
+    el.classList.remove('score-pop'); void el.offsetWidth; el.classList.add('score-pop');
+  }
+  document.getElementById('score-a').classList.toggle('active', G.currentTeam===0);
+  document.getElementById('score-b').classList.toggle('active', G.currentTeam===1);
+  document.getElementById('round-num').textContent = G.round;
+
+  const badge = document.getElementById('status-badge');
+  const states = { idle:'⏳ Esperando turno', playing:'🟢 Ronda en curso', ended:'⏰ Fin del turno' };
+  badge.textContent = states[G.gamePhase]||'';
+  badge.className = 'status-badge ' + (G.gamePhase==='playing'?'playing':G.gamePhase==='ended'?'ended':'waiting');
+  renderTimerPublico(G.timerLeft);
+}
+
+function renderTimerPublico(s) {
+  const num  = document.getElementById('timer-num');
+  const ring = document.getElementById('ring-fg');
+  const circ = 2*Math.PI*70;
+  num.textContent = s;
+  ring.style.strokeDashoffset = circ * (1 - s/G.timerSecs);
+  num.classList.toggle('urgent', s<=10);
+  ring.style.stroke = s<=10?'#e84f4f':s<=20?'#f39c12':'#2ecc71';
+}
+
+function renderEntreturno() {
+  document.getElementById('et-nom-a').textContent = G.teams[0].name;
+  document.getElementById('et-nom-b').textContent = G.teams[1].name;
+  document.getElementById('et-pts-a').textContent = G.teams[0].score;
+  document.getElementById('et-pts-b').textContent = G.teams[1].score;
+  document.getElementById('et-desc').textContent = `Le toca al equipo ${G.teams[G.currentTeam].name}`;
+}
+
+function confetti() {
+  const area = document.getElementById('confetti-area');
+  ['#f7c948','#2ecc71','#4f5fe8','#e84f4f','#fff'].forEach((c,i) => {
+    for(let j=0;j<4;j++){
+      const p=document.createElement('div'); p.className='cp';
+      p.style.cssText=`left:${Math.random()*100}%;background:${c};animation-duration:${.8+Math.random()*1.2}s;animation-delay:${Math.random()*.3}s;`;
+      area.appendChild(p); setTimeout(()=>p.remove(),2000);
+    }
+  });
+}
+
+// =============================================
+// VISTA MÓVIL (jugador / juez)
+// =============================================
+function initMobile(rol) {
+  showScreen('screen-movil');
+  const esJuez = rol === 'juez';
+
+  // Header según rol
+  document.getElementById('movil-hdr').className = `movil-hdr ${esJuez?'juez':'jugador'}`;
+  document.getElementById('movil-title').textContent = esJuez ? '⚖️ Vista Juez' : '🗣️ Tu carta';
+  document.getElementById('movil-footer').textContent = esJuez
+    ? 'Controlá que no digan palabras prohibidas'
+    : '¡Describí sin decir las palabras de la carta!';
+
+  // Botones del juez visibles
+  if (esJuez) document.getElementById('movil-actions').classList.add('visible');
+
+  // Acciones juez → localStorage → coordinador
+  document.getElementById('btn-mcorrecto').addEventListener('click', () => {
+    localStorage.setItem(LS.ACTION, JSON.stringify({ action:'correcto', ts:Date.now() }));
+    toast('✅ Correcto enviado', 'ok');
+  });
+  document.getElementById('btn-mtabu').addEventListener('click', () => {
+    localStorage.setItem(LS.ACTION, JSON.stringify({ action:'tabu', ts:Date.now() }));
+    toast('🚫 Tabú enviado', 'err');
+  });
+
+  let lastCardIdx = -2;
+
+  function syncFromLS() {
+    try {
+      const raw = localStorage.getItem(LS.GAME);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+
+      // Timer
+      const elapsed = (Date.now() - d.ts) / 1000;
+      const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
+      const timerEl = document.getElementById('movil-timer');
+      timerEl.textContent = left;
+      timerEl.classList.toggle('urgent', left<=10);
+      const bar = document.getElementById('movil-bar');
+      bar.style.width = (left / d.timerSecs * 100) + '%';
+      bar.classList.toggle('urgent', left<=10);
+
+      // Carta: solo actualizar si cambió el índice
+      if (d.cardIdx !== lastCardIdx) {
+        lastCardIdx = d.cardIdx;
+        const img     = document.getElementById('movil-img');
+        const waiting = document.getElementById('movil-waiting');
+        if (d.phase === 'playing' && d.cardDataUrl) {
+          img.src = d.cardDataUrl;
+          img.style.display = 'block';
+          waiting.style.display = 'none';
+        } else {
+          img.style.display = 'none';
+          waiting.style.display = 'flex';
+          waiting.innerHTML = d.phase === 'ended'
+            ? '<div class="w-icon">⏰</div><div>Fin del turno</div>'
+            : '<div class="w-icon">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div>';
+        }
+      }
+
+      // Habilitar/deshabilitar botones juez
+      if (esJuez) {
+        const activo = d.phase === 'playing' && d.running && !d.paused;
+        document.getElementById('btn-mcorrecto').disabled = !activo;
+        document.getElementById('btn-mtabu').disabled = !activo;
+      }
+    } catch(e) {}
+  }
+
+  // Escuchar cambios en tiempo real + polling fallback
+  window.addEventListener('storage', e => { if (e.key === LS.GAME) syncFromLS(); });
+  setInterval(syncFromLS, 800);
+  syncFromLS(); // lectura inicial
+}
+
+// =============================================
+// VISTA ESPECTADOR
+// =============================================
+function initEspectador() {
+  showScreen('screen-espectador');
+  let lastCardIdx = -2;
+
+  function syncEsp() {
+    try {
+      const raw = localStorage.getItem(LS.GAME);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      const elapsed = (Date.now()-d.ts)/1000;
+      const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
+
+      document.getElementById('esp-nom-a').textContent = d.names[0];
+      document.getElementById('esp-nom-b').textContent = d.names[1];
+      document.getElementById('esp-pts-a').textContent = d.scores[0];
+      document.getElementById('esp-pts-b').textContent = d.scores[1];
+      document.getElementById('esp-score-a').classList.toggle('active', d.currentTeam===0);
+      document.getElementById('esp-score-b').classList.toggle('active', d.currentTeam===1);
+      document.getElementById('esp-round').textContent = d.round;
+
+      const num = document.getElementById('esp-timer-num');
+      num.textContent = left;
+      num.classList.toggle('urgent', left<=10);
+      const ring = document.getElementById('esp-ring-fg');
+      ring.style.strokeDashoffset = (2*Math.PI*70)*(1-left/d.timerSecs);
+      ring.style.stroke = left<=10?'#e84f4f':left<=20?'#f39c12':'#2ecc71';
+
+      const badge = document.getElementById('esp-status');
+      const estados = { idle:'⏳ Esperando turno', playing:'🟢 Ronda en curso', ended:'⏰ Fin del turno' };
+      badge.textContent = estados[d.phase]||'';
+      badge.className = 'status-badge '+(d.phase==='playing'?'playing':d.phase==='ended'?'ended':'waiting');
+    } catch(e){}
+  }
+
+  window.addEventListener('storage', e => { if(e.key===LS.GAME) syncEsp(); });
+  setInterval(syncEsp, 800);
+  syncEsp();
+}
+
+// =============================================
+// COORDINADOR: escuchar acciones del juez
+// =============================================
+let lastAction = null;
+setInterval(() => {
+  if (!document.getElementById('screen-juego').classList.contains('active')) return;
+  try {
+    const raw = localStorage.getItem(LS.ACTION);
+    if (!raw || raw === lastAction) return;
+    lastAction = raw;
+    const { action, ts } = JSON.parse(raw);
+    if (Date.now() - ts > 4000) return; // ignorar acciones viejas
+    localStorage.removeItem(LS.ACTION);
+    if (action === 'correcto') accionCorrecto();
+    else if (action === 'tabu') accionTabu();
+  } catch(e) {}
+}, 200);
+
+// =============================================
+// PANTALLA FINAL
+// =============================================
+function mostrarFinal() {
+  const tied = G.teams[0].score === G.teams[1].score;
+  const w = G.teams[0].score >= G.teams[1].score ? 0 : 1;
+  document.getElementById('final-winner').textContent = tied ? '🤝 ¡Empate!' : `🎉 ¡Ganó ${G.teams[w].name}!`;
+  document.getElementById('final-scores').innerHTML = G.teams.map((t,i) => {
+    const win = !tied && i===w;
+    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${t.name}</div><div class="fs-pts">${t.score}</div><div style="font-size:.75rem;opacity:.7">puntos</div></div>`;
+  }).join('');
+  showScreen('screen-final');
+  setTimeout(confetti, 300);
+}
+
+// =============================================
+// INICIO
+// =============================================
 showScreen('screen-bienvenida');
 </script>
 
-<!-- CARTAS EMBEBIDAS -->
 <script>
 const CARTAS_EMBEBIDAS = [
   { name: 'Sistema Límbico', dataUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAgAAAQABAAD/wAARCAREBEQDACIAAREBAhEB/9sAQwAIBgYHBgUIBwcHCQkICgwUDQwLCwwZEhMPFB0aHx4dGhwcICQuJyAiLCMcHCg3KSwwMTQ0NB8nOT04MjwuMzQy/9sAQwEJCQkMCwwYDQ0YMiEcITIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMAAAERAhEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK4Px38WNA8DFrWZmvdU25FnARlfTe3RR+Z9qAO8or5S1r4++M9TkIsZbXS4c8Lbwh2x7s+f0Arl5viV42ncu/ijVAT/AHLgoPyGBQB9q0V8YWnxV8dWRzF4mvm/67ES/wDoYNdjon7RPieyZV1azstSiH3mC+TIfxX5f/HaAPp6ivO/CXxn8K+K7qCxEk9hqEzBEt7lOHY9lYZB/HBPpXolAFa/1C00uwmvr+4jt7WFd0ksjYVRXmd5+0H4JtrgxRDU7tB/y1htgFP/AH2yn9KyP2kb64h8M6PZRsVguLpnlA/iKL8oPt8xP4D0r5soA+2PCfxA8N+NFcaNf75413SW8qFJFHrg9R7jIrp6+LPhjfXGn/Evw9LbMQ0l7HC2O6OdjD8ia+06ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiuK+K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UtG13WYturXUe2OFhzbxnnB/2jxn0HHrXS+C/hT4a8EuLm0ge71DGPtd1hnX12ADC/hz713FABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU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RRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/2Q==' },
@@ -1158,9 +968,5 @@ const CARTAS_EMBEBIDAS = [
 
 </script>
 
-<!-- QR lib (MIT) -->
-<script>
-var qrcode=function(){var a=function(a,b){this.typeNumber=a,this.errorCorrectLevel=b,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[]};a.prototype={addData:function(a,b){b=b||"Byte";var c;switch(b){case"Numeric":c=new k(a);break;case"Alphanumeric":c=new l(a);break;case"Byte":c=new m(a);break;case"Kanji":c=new n(a);break;default:throw new Error("mode:"+b)}this.dataList.push(c),this.dataCache=null},isDark:function(a,b){if(0>a||this.moduleCount<=a||0>b||this.moduleCount<=b)throw new Error(a+","+b);return this.modules[a][b]},getModuleCount:function(){return this.moduleCount},make:function(){if(1>this.typeNumber){for(var a=1,a=1;40>=a;a++){for(var b=i.getRSBlocks(a,this.errorCorrectLevel),c=new j,d=0,e=0;e<b.length;e++)d+=b[e].dataCount;for(var f=0,e=0;e<this.dataList.length;e++)f+=this.dataList[e].getLengthInBits(a);if(f<=d)break}this.typeNumber=a}this.makeImpl(!1,this.getBestMaskPattern())},makeImpl:function(a,b){this.moduleCount=4*this.typeNumber+17,this.modules=function(a){for(var b=new Array(a),c=0;a>c;c++){b[c]=new Array(a);for(var d=0;a>d;d++)b[c][d]=null}return b}(this.moduleCount),this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupPositionAdjustPattern(),this.setupTimingPattern(),this.setupTypeInfo(a,b),7<=this.typeNumber&&this.setupTypeNumber(a),null==this.dataCache&&(this.dataCache=f(this.typeNumber,this.errorCorrectLevel,this.dataList)),this.mapData(this.dataCache,b)},setupPositionProbePattern:function(a,b){for(var c=-1;7>=c;c++)if(!(-1>=a+c||this.moduleCount<=a+c))for(var d=-1;7>=d;d++)-1>=b+d||this.moduleCount<=b+d||(this.modules[a+c][b+d]=0<=c&&6>=c&&(0==d||6==d)||0<=d&&6>=d&&(0==c||6==c)||2<=c&&4>=c&&2<=d&&4>=d?!0:!1)},getBestMaskPattern:function(){for(var a=0,b=0,c=0;8>c;c++){this.makeImpl(!0,c);var d=h.getLostPoint(this);(0==c||a>d)&&(a=d,b=c)}return b},setupTimingPattern:function(){for(var a=8;this.moduleCount-8>a;a++)null==this.modules[a][6]&&(this.modules[a][6]=0==a%2);for(var b=8;this.moduleCount-8>b;b++)null==this.modules[6][b]&&(this.modules[6][b]=0==b%2)},setupPositionAdjustPattern:function(){for(var a=g.getPatternPosition(this.typeNumber),b=0;b<a.length;b++)for(var c=0;c<a.length;c++){var d=a[b],e=a[c];if(null==this.modules[d][e])for(var f=-2;2>=f;f++)for(var h=-2;2>=h;h++)this.modules[d+f][e+h]=-2==f||2==f||-2==h||2==h||0==f&&0==h?!0:!1}},setupTypeNumber:function(a){for(var b=i.getBCHTypeNumber(this.typeNumber),c=0;18>c;c++){var d=!a&&1==(b>>c&1);this.modules[Math.floor(c/3)][c%3+this.moduleCount-8-3]=d}for(var c=0;18>c;c++){var d=!a&&1==(b>>c&1);this.modules[c%3+this.moduleCount-8-3][Math.floor(c/3)]=d}},setupTypeInfo:function(a,b){for(var c=i.getBCHTypeInfo(this.errorCorrectLevel<<3|b),d=0;15>d;d++){var e=!a&&1==(c>>d&1);6>d?this.modules[d][8]=e:8>d?this.modules[d+1][8]=e:this.modules[this.moduleCount-15+d][8]=e}for(var d=0;15>d;d++){var e=!a&&1==(c>>d&1);8>d?this.modules[8][this.moduleCount-d-1]=e:9>d?this.modules[8][15-d-1+1]=e:this.modules[8][15-d-1]=e}this.modules[this.moduleCount-8][8]=!a},mapData:function(a,b){for(var c=-1,d=this.moduleCount-1,e=7,f=0,g=this.moduleCount-1;0<g;g-=2)for(6==g&&g--;;){for(var h=0;2>h;h++)if(null==this.modules[d][g-h]){var k=!1;f<a.length&&(k=1==(a[f]>>>e&1));var l=i.getMask(b,d,g-h);l&&(k=!k),this.modules[d][g-h]=k,e--,-1==e&&(f++,e=7)}if(d+=c,0>d||this.moduleCount<=d){d-=c,c=-c;break}}}};var b=a,c=function(){var a={};return a[1<<0]="L",a[1<<1]="M",a[1<<2]="Q",a[1<<3]="H",a}();b.ErrorCorrectLevel=c;var d=function(a,b,c){this.totalCount=a,this.dataCount=b},e=d;e.getRSBlocks=function(a,b){var c=e.getRsBlockTable(a,b);if(void 0==c)throw new Error("bad rs block @ typeNumber:"+a+"/errorCorrectLevel:"+b);for(var d=c.length/3,f=[],g=0;d>g;g++)for(var h=c[3*g+0],i=c[3*g+1],j=c[3*g+2],k=0;h>k;k++)f.push(new e(i,j));return f};e.getRsBlockTable=function(a,b){switch(b){case 1<<0:return[1,26,19,1,26,16,2,26,13,4,26,9][3*(a-1)]&&[1,26,19,1,26,16,2,26,13,4,26,9].slice(3*(a-1),3*a);case 1<<1:return[[1,26,16],[1,26,19],[1,44,34],[2,26,19],[4,26,16],[2,44,28],[4,26,19],[2,44,33],[8,26,16],[8,44,31],[2,36,28],[6,36,26],[4,46,36],[8,36,26],[1,26,16,6,26,19],[6,36,26,2,36,28],[8,46,38,1,46,41],[10,36,26,2,36,28],[12,36,26,4,36,28],[6,46,38,2,46,41],[17,36,26],[12,36,26,6,36,28],[6,46,40,14,46,41],[24,36,26],[8,46,44,7,46,45],[12,36,26,14,36,28],[12,46,42,14,46,43],[24,46,44,5,46,45],[6,36,28,14,36,29],[12,36,26,14,36,28],[6,46,42,14,46,43],[6,36,28,14,36,29],[12,36,26,14,36,28],[17,36,28,11,36,29],[7,36,26,17,36,27],[12,36,26,14,36,28],[14,46,42,12,46,43],[11,36,26,17,36,27],[12,46,40,20,46,41],[12,36,26,16,36,28]][a-1];case 1<<2:return[[1,26,13],[1,26,22],[2,26,17],[4,26,9],[2,26,11,2,26,12],[4,26,14,2,26,15],[4,18,12,4,18,13],[6,26,7,2,26,8],[6,26,9,2,26,10],[8,26,9,2,26,10],[8,26,9,4,26,10],[4,36,23,4,36,24],[5,26,8,7,26,9],[7,26,8,5,26,9],[10,26,9,1,26,10],[8,26,9,4,26,10],[4,26,8,12,26,9],[12,26,8,4,26,9],[11,26,9,5,26,10],[12,26,8,4,26,9],[11,26,9,5,26,10],[12,26,8,4,26,9],[12,26,8,4,26,9],[14,26,8,2,26,9],[12,26,8,6,26,9],[15,26,8,1,26,9],[12,26,8,6,26,9],[12,26,8,6,26,9],[14,26,8,4,26,9],[12,26,8,8,26,9],[12,26,9,4,26,10],[14,26,9,2,26,10],[12,26,8,6,26,9],[15,26,8,1,26,9],[12,26,8,6,26,9],[15,26,8,1,26,9],[14,26,8,4,26,9],[12,26,8,6,26,9],[12,26,8,6,26,9],[14,26,8,4,26,9]][a-1];case 1<<3:return[[1,26,9],[1,26,16],[2,26,13],[2,26,6,2,26,7],[4,26,9],[4,26,9,2,26,10],[6,18,8,2,18,9],[6,26,6,2,26,7],[8,26,7,2,26,8],[8,26,7,4,26,8],[8,26,7,4,26,8],[10,26,7,2,26,8],[6,36,9,7,36,10],[9,26,6,5,26,7],[12,26,7],[6,36,8,6,36,9],[17,26,6],[9,26,6,8,26,7],[10,26,6,7,26,7],[12,26,6,6,26,7],[11,26,6,7,26,7],[14,26,7,4,26,8],[14,26,6,5,26,7],[14,26,7,4,26,8],[12,26,6,8,26,7],[13,26,6,7,26,7],[13,26,7,6,26,8],[12,26,6,8,26,7],[14,26,6,6,26,7],[15,26,6,5,26,7],[12,26,7,7,26,8],[15,26,6,5,26,7],[14,26,7,6,26,8],[14,26,7,6,26,8],[15,26,6,5,26,7],[17,26,6,1,26,7],[16,26,7,3,26,8],[16,26,6,4,26,7],[15,26,6,5,26,7],[17,26,6,1,26,7]][a-1]}};var f=function(a,b,c){for(var d=i.getRSBlocks(a,b),e=new j,f=0;f<c.length;f++){var g=c[f];e.put(g.getMode(),4),e.put(g.getLength(),i.getLengthInBits(g.getMode(),a)),g.write(e)}for(var h=0,f=0;f<d.length;f++)h+=d[f].dataCount;if(e.getLengthInBits()>8*h)throw new Error("code length overflow.");for(e.getLengthInBits()+4<=8*h&&e.put(0,4);0!=e.getLengthInBits()%8;)e.putBit(!1);for(;;){if(e.getLengthInBits()>=8*h)break;if(e.put(236,8),e.getLengthInBits()>=8*h)break;e.put(17,8)}return function(a,b){for(var c=0,e=0,f=0,g=new Array(b.length),h=new Array(b.length),i=0;i<b.length;i++){var j=b[i].dataCount,k=b[i].totalCount-j,l=0;g[i]=new Array(j);for(var m=0;m<g[i].length;m++)g[i][m]=255&a.buffer[l+++(c+e)];h[i]=new Array(k);for(var m=0;m<h[i].length;m++)h[i][m]=255&a.buffer[l+++(c+e)];e+=j,f+=k}var n=0;for(var o=new Array(c+e+f),p=0;;){if(p>=b[n].dataCount)break;for(var i=0;i<b.length;i++)p<b[i].dataCount&&(o[n++]=g[i][p]);p++}for(var p=0;;){for(var i=0;i<b.length;i++){if(p>=h[i].length)continue;o[n++]=h[i][p]}if(n>=o.length)break;p++}return o}(e,d)},g=function(){var a={};return a.getPatternPosition=function(a){return[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]][a-1]||[]},a}();var h=function(){var a={};return a.getLostPoint=function(a){for(var b=a.getModuleCount(),c=0,d=0;b>d;d++){for(var e=0;b>e;e++){for(var f=0,g=a.isDark(d,e),h=-1;1>=h;h++)if(!(0>d+h||b<=d+h))for(var i=-1;1>=i;i++)0>e+i||b<=e+i||(h!=0||i!=0)&&a.isDark(d+h,e+i)==g&&f++;f>=5&&(c+=3+(f-5))}for(var d=0;b-1>d;d++)for(var e=0;b-1>e;e++){var j=0;a.isDark(d,e)&&j++,a.isDark(d+1,e)&&j++,a.isDark(d,e+1)&&j++,a.isDark(d+1,e+1)&&j++,(0==j||4==j)&&(c+=3)}}return c},a}();var i=function(){var a={};return a.getBCHTypeInfo=function(a){for(var b=a<<10;0<=i.getBCHDigit(b)-i.getBCHDigit(1335);)b^=1335<<i.getBCHDigit(b)-i.getBCHDigit(1335);return 21522^(a<<10|b)},a.getBCHTypeNumber=function(a){for(var b=a<<12;0<=i.getBCHDigit(b)-i.getBCHDigit(7973);)b^=7973<<i.getBCHDigit(b)-i.getBCHDigit(7973);return a<<12|b},a.getBCHDigit=function(a){for(var b=0;0!=a;)b++,a>>>=1;return b},a.getPatternPosition=g.getPatternPosition,a.getMask=function(a,b,c){switch(a){case 0:return 0==(b+c)%2;case 1:return 0==b%2;case 2:return 0==c%3;case 3:return 0==(b+c)%3;case 4:return 0==(Math.floor(b/2)+Math.floor(c/3))%2;case 5:return 0==b*c%2+b*c%3;case 6:return 0==(b*c%2+b*c%3)%2;case 7:return 0==(b*c%3+(b+c)%2)%2;default:throw new Error("bad maskPattern:"+a)}},a.getErrorCorrectPolynomial=function(a){for(var b=new p([1],0),c=0;a>c;c++)b=b.multiply(new p([1,q.gexp(c)],0));return b},a.getLengthInBits=function(a,b){if(1<=b&&10>b)switch(a){case 1:return 10;case 2:return 9;case 4:return 8;case 8:return 8;default:throw new Error("mode:"+a)}else if(27>b)switch(a){case 1:return 12;case 2:return 11;case 4:return 16;case 8:return 10;default:throw new Error("mode:"+a)}else{if(!(41>b))throw new Error("type:"+b);switch(a){case 1:return 14;case 2:return 13;case 4:return 16;case 8:return 12;default:throw new Error("mode:"+a)}}},a.getRSBlocks=e.getRSBlocks,a}();var j=function(){this.buffer=[],this.length=0};j.prototype={get:function(a){var b=Math.floor(a/8);return 1==(this.buffer[b]>>>7-a%8&1)},put:function(a,b){for(var c=0;b>c;c++)this.putBit(1==(a>>>b-c-1&1))},getLengthInBits:function(){return this.length},putBit:function(a){var b=Math.floor(this.length/8);this.buffer.length<=b&&this.buffer.push(0),a&&(this.buffer[b]|=128>>>this.length%8),this.length++}};var k=function(a){this.data=a};k.prototype={getMode:function(){return 1},getLength:function(){return this.data.length},getLengthInBits:function(a){return this.getLength()*(10==i.getLengthInBits(1,a)?10:14)},write:function(a){for(var b=this.data,c=0;c+2<b.length;c+=3){var d=parseInt(b.substring(c,c+3),10);a.put(d,10)}var e=b.length-c;1==e?a.put(parseInt(b.substring(c),10),4):2==e&&a.put(parseInt(b.substring(c),10),7)}};var l=function(a){this.data=a};l.prototype={getMode:function(){return 2},getLength:function(){return this.data.length},getLengthInBits:function(a){return this.getLength(a)*(i.getLengthInBits(2,a))},write:function(a){for(var b=this.data,c=0;c+1<b.length;c+=2){var d=45*l.getCode(b.charAt(c));d+=l.getCode(b.charAt(c+1)),a.put(d,11)}b.length%2&&a.put(l.getCode(b.charAt(b.length-1)),6)}};l.getCode=function(a){if(a>="0"&&a<="9")return a.charCodeAt(0)-"0".charCodeAt(0);if(a>="A"&&a<="Z")return a.charCodeAt(0)-"A".charCodeAt(0)+10;switch(a){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw new Error("illegal char :"+a)}};var m=function(a){this.data=a};m.prototype={getMode:function(){return 4},getLength:function(){return this.getBytes().length},getLengthInBits:function(a){return 8*this.getLength(a)},getBytes:function(){for(var a=[],b=0;b<this.data.length;b++){var c=this.data.charCodeAt(b);128>c?a.push(c):2048>c?(a.push(192|c>>6),a.push(128|63&c)):(a.push(224|c>>12),a.push(128|c>>6&63),a.push(128|63&c))}return a},write:function(a){for(var b=this.getBytes(),c=0;c<b.length;c++)a.put(b[c],8)}};var n=function(a){this.data=a};n.prototype={getMode:function(){return 8},getLength:function(){return Math.floor(this.data.length/2)},getLengthInBits:function(a){return 13*this.getLength(a)},write:function(a){for(var b=this.data,c=0;c<b.length-1;c+=2){var d=65536*b.charCodeAt(c)+b.charCodeAt(c+1);if(d>=33088&&d<=40956)d-=33088;else{if(!(d>=57408&&d<=60351))throw new Error("illegal char at "+(c+1)+"["+d+"]");d-=49472}d=192*(d>>>8)+d&255,a.put(d,13)}}};var o=a;o.stringToBytes=function(a){for(var b=[],c=0;c<a.length;c++)b.push(a.charCodeAt(c));return b};var p=function(a,b){if(void 0==a.length)throw new Error(a.length+"/"+b);var c=0;for(;c<a.length&&0==a[c];)c++;this.num=new Array(a.length-c+b);for(var d=0;d<a.length-c;d++)this.num[d]=a[d+c]};p.prototype={get:function(a){return this.num[this.num.length-1-a]},getLength:function(){return this.num.length},multiply:function(a){for(var b=new Array(this.getLength()+a.getLength()-1),c=0;c<this.getLength();c++)for(var d=0;d<a.getLength();d++)b[c+d]^=q.gexp(q.glog(this.get(c))+q.glog(a.get(d)));return new p(b,0)},mod:function(a){if(this.getLength()-a.getLength()<0)return this;for(var b=q.glog(this.get(this.getLength()-1))-q.glog(a.get(a.getLength()-1)),c=new Array(this.getLength()),d=0;d<this.getLength();d++)c[d]=this.get(d);for(var d=0;d<a.getLength();d++)c[c.length-1-d]^=q.gexp(q.glog(a.get(a.getLength()-1-d))+b);return new p(c,0).mod(a)}};var q=function(){for(var a=new Array(256),b=new Array(256),c=0;8>c;c++)a[c]=1<<c;for(var c=8;256>c;c++)a[c]=a[c-4]^a[c-5]^a[c-6]^a[c-8];for(var c=0;255>c;c++)b[a[c]]=c;return{gexp:function(a){return 0>a?a+=255:a>=256&&(a-=255),q.EXP_TABLE[a]},glog:function(a){if(0>=a)throw new Error("glog("+a+")");return q.LOG_TABLE[a]},EXP_TABLE:a,LOG_TABLE:b}}();return o}();
-</script>
 </body>
 </html>
