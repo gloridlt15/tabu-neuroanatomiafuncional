@@ -709,6 +709,7 @@ function finalizarTurno() {
   G.currentTeam = G.currentTeam === 0 ? 1 : 0;
   G.gamePhase = 'idle';
   G.rolesSwapped = !G.rolesSwapped;  // invertir roles
+  console.log('finalizarTurno: rolesSwapped ahora =', G.rolesSwapped);
   publish();
 }
 
@@ -876,9 +877,11 @@ function initMobile(rol) {
 
   function applyGameState(d) {
     if (!d) return;
+    console.log('applyGameState:', d.phase, 'rolesSwapped:', d.rolesSwapped, 'lastRolesSwapped:', lastRolesSwapped, 'esJuez:', esJuez);
 
     // Detectar cambio de roles
     if (lastRolesSwapped !== null && d.rolesSwapped !== lastRolesSwapped) {
+      console.log('🔄 CAMBIANDO ROL!');
       // Los roles se invirtieron — cambiar rol actual
       const nuevoRol = esJuez ? 'jugador' : 'juez';
       esJuez = !esJuez;
