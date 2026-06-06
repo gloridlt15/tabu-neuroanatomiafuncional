@@ -425,12 +425,59 @@ const G = {
 const PIN = '1234';
 
 // =============================================
-// localStorage keys
+// Firebase REST API (sin SDK externo)
 // =============================================
-const LS = {
-  GAME: 'tabu_game',       // estado completo del juego (coordinador → todos)
-  ACTION: 'tabu_action',   // acción del juez → coordinador
-};
+const FB_URL = "https://tabu-neuro-default-rtdb.firebaseio.com";
+const FB_KEY = "AIzaSyA79R3QxGiBIfXO45-qYI_IFQV1gMyA2iI";
+
+// Objeto que imita la interfaz de Firebase SDK usando REST + SSE
+const refGame = makeRef('game');
+const refAction = makeRef('action');
+
+function makeRef(path) {
+  const url = `${FB_URL}/${path}.json?auth=${FB_KEY}`;
+  const listeners = [];
+  let es = null;
+
+  return {
+    set(data) {
+      return fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).catch(e => console.warn('FB set error', e));
+    },
+    remove() {
+      return fetch(url, { method: 'DELETE' })
+        .catch(e => console.warn('FB remove error', e));
+    },
+    once(evt) {
+      return fetch(url).then(r => r.json()).then(data => ({ val: () => data }));
+    },
+    on(evt, cb) {
+      // Server-Sent Events para tiempo real
+      const sseUrl = `${FB_URL}/${path}.json?auth=${FB_KEY}`;
+      es = new EventSource(sseUrl);
+      es.addEventListener('put', e => {
+        try {
+          const msg = JSON.parse(e.data);
+          cb({ val: () => msg.data });
+        } catch(err) {}
+      });
+      es.addEventListener('patch', e => {
+        try {
+          const msg = JSON.parse(e.data);
+          cb({ val: () => msg.data });
+        } catch(err) {}
+      });
+      es.onerror = () => {
+        // Reconectar en caso de error
+        setTimeout(() => { if(es) { es.close(); this.on(evt, cb); } }, 2000);
+      };
+    },
+    off() { if(es) { es.close(); es = null; } }
+  };
+}
 
 // =============================================
 // UTILIDADES
@@ -459,7 +506,7 @@ function shuffle(arr) {
 function publish() {
   const card = G.deck[G.currentCardIdx] || null;
   try {
-    localStorage.setItem(LS.GAME, JSON.stringify({
+    refGame.set({
       phase: G.gamePhase,
       cardDataUrl: card ? card.dataUrl : null,
       cardIdx: G.currentCardIdx,
@@ -474,7 +521,7 @@ function publish() {
       names: [G.teams[0].name, G.teams[1].name],
       currentTeam: G.currentTeam,
       ts: Date.now(),
-    }));
+    });
   } catch(e) { console.warn('publish failed', e); }
 }
 
@@ -567,6 +614,7 @@ function iniciarJuego() {
   // Publicar estado inicial (sin carta) para que jugador/juez vean "esperando"
   publish();
   renderCoord();
+  startCoordListener();
   showScreen('screen-juego');
 }
 
@@ -797,65 +845,63 @@ function initMobile(rol) {
   // Botones del juez visibles
   if (esJuez) document.getElementById('movil-actions').classList.add('visible');
 
-  // Acciones juez → localStorage → coordinador
+  // Acciones juez → Firebase → coordinador
   document.getElementById('btn-mcorrecto').addEventListener('click', () => {
-    localStorage.setItem(LS.ACTION, JSON.stringify({ action:'correcto', ts:Date.now() }));
+    refAction.set({ action:'correcto', ts:Date.now() });
     toast('✅ Correcto enviado', 'ok');
   });
   document.getElementById('btn-mtabu').addEventListener('click', () => {
-    localStorage.setItem(LS.ACTION, JSON.stringify({ action:'tabu', ts:Date.now() }));
+    refAction.set({ action:'tabu', ts:Date.now() });
     toast('🚫 Tabú enviado', 'err');
   });
 
   let lastCardIdx = -2;
 
-  function syncFromLS() {
-    try {
-      const raw = localStorage.getItem(LS.GAME);
-      if (!raw) return;
-      const d = JSON.parse(raw);
+  function applyGameState(d) {
+    if (!d) return;
+    // Timer
+    const elapsed = (Date.now() - d.ts) / 1000;
+    const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
+    const timerEl = document.getElementById('movil-timer');
+    timerEl.textContent = left;
+    timerEl.classList.toggle('urgent', left<=10);
+    const bar = document.getElementById('movil-bar');
+    bar.style.width = (left / d.timerSecs * 100) + '%';
+    bar.classList.toggle('urgent', left<=10);
 
-      // Timer
-      const elapsed = (Date.now() - d.ts) / 1000;
-      const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
-      const timerEl = document.getElementById('movil-timer');
-      timerEl.textContent = left;
-      timerEl.classList.toggle('urgent', left<=10);
-      const bar = document.getElementById('movil-bar');
-      bar.style.width = (left / d.timerSecs * 100) + '%';
-      bar.classList.toggle('urgent', left<=10);
-
-      // Carta: solo actualizar si cambió el índice
-      if (d.cardIdx !== lastCardIdx) {
-        lastCardIdx = d.cardIdx;
-        const img     = document.getElementById('movil-img');
-        const waiting = document.getElementById('movil-waiting');
-        if (d.phase === 'playing' && d.cardDataUrl) {
-          img.src = d.cardDataUrl;
-          img.style.display = 'block';
-          waiting.style.display = 'none';
-        } else {
-          img.style.display = 'none';
-          waiting.style.display = 'flex';
-          waiting.innerHTML = d.phase === 'ended'
-            ? '<div class="w-icon">⏰</div><div>Fin del turno</div>'
-            : '<div class="w-icon">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div>';
-        }
+    // Carta: solo actualizar si cambió el índice
+    if (d.cardIdx !== lastCardIdx) {
+      lastCardIdx = d.cardIdx;
+      const img     = document.getElementById('movil-img');
+      const waiting = document.getElementById('movil-waiting');
+      if (d.phase === 'playing' && d.cardDataUrl) {
+        img.src = d.cardDataUrl;
+        img.style.display = 'block';
+        waiting.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        waiting.style.display = 'flex';
+        waiting.innerHTML = d.phase === 'ended'
+          ? '<div class="w-icon">⏰</div><div>Fin del turno</div>'
+          : '<div class="w-icon">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div>';
       }
+    }
 
-      // Habilitar/deshabilitar botones juez
-      if (esJuez) {
-        const activo = d.phase === 'playing' && d.running && !d.paused;
-        document.getElementById('btn-mcorrecto').disabled = !activo;
-        document.getElementById('btn-mtabu').disabled = !activo;
-      }
-    } catch(e) {}
+    // Habilitar/deshabilitar botones juez
+    if (esJuez) {
+      const activo = d.phase === 'playing' && d.running && !d.paused;
+      document.getElementById('btn-mcorrecto').disabled = !activo;
+      document.getElementById('btn-mtabu').disabled = !activo;
+    }
   }
 
-  // Escuchar cambios en tiempo real + polling fallback
-  window.addEventListener('storage', e => { if (e.key === LS.GAME) syncFromLS(); });
-  setInterval(syncFromLS, 800);
-  syncFromLS(); // lectura inicial
+  // Escuchar Firebase en tiempo real
+  refGame.on('value', snap => { applyGameState(snap.val()); });
+  
+  // Polling fallback para el timer (Firebase no actualiza cada segundo)
+  setInterval(() => {
+    refGame.once('value').then(snap => applyGameState(snap.val()));
+  }, 1000);
 }
 
 // =============================================
@@ -865,11 +911,9 @@ function initEspectador() {
   showScreen('screen-espectador');
   let lastCardIdx = -2;
 
-  function syncEsp() {
+  function syncEsp(d) {
     try {
-      const raw = localStorage.getItem(LS.GAME);
-      if (!raw) return;
-      const d = JSON.parse(raw);
+      if (!d) return;
       const elapsed = (Date.now()-d.ts)/1000;
       const left = d.running ? Math.max(0, d.timerLeft - Math.floor(elapsed)) : d.timerLeft;
 
@@ -895,28 +939,28 @@ function initEspectador() {
     } catch(e){}
   }
 
-  window.addEventListener('storage', e => { if(e.key===LS.GAME) syncEsp(); });
-  setInterval(syncEsp, 800);
-  syncEsp();
+  refGame.on('value', snap => { if(snap.val()) syncEsp(snap.val()); });
+  setInterval(() => { refGame.once('value').then(s => { if(s.val()) syncEsp(s.val()); }); }, 1000);
 }
 
 // =============================================
-// COORDINADOR: escuchar acciones del juez
+// COORDINADOR: escuchar acciones del juez via Firebase
 // =============================================
-let lastAction = null;
-setInterval(() => {
-  if (!document.getElementById('screen-juego').classList.contains('active')) return;
-  try {
-    const raw = localStorage.getItem(LS.ACTION);
-    if (!raw || raw === lastAction) return;
-    lastAction = raw;
-    const { action, ts } = JSON.parse(raw);
-    if (Date.now() - ts > 4000) return; // ignorar acciones viejas
-    localStorage.removeItem(LS.ACTION);
-    if (action === 'correcto') accionCorrecto();
-    else if (action === 'tabu') accionTabu();
-  } catch(e) {}
-}, 200);
+let coordListening = false;
+function startCoordListener() {
+  if (coordListening) return;
+  coordListening = true;
+  refAction.on('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    if (Date.now() - d.ts > 4000) return; // ignorar acciones viejas
+    if (!document.getElementById('screen-juego').classList.contains('active')) return;
+    // Limpiar para no procesar dos veces
+    refAction.remove();
+    if (d.action === 'correcto') accionCorrecto();
+    else if (d.action === 'tabu') accionTabu();
+  });
+}
 
 // =============================================
 // PANTALLA FINAL
