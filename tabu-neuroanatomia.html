@@ -435,7 +435,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <script>
 // ================================================
-// FIREBASE REST API
+// FIREBASE REST API (polling)
 // ================================================
 const FB_URL = "https://tabu-neuro-default-rtdb.firebaseio.com";
 
@@ -443,51 +443,29 @@ function makeRef(path) {
   const url = `${FB_URL}/${path}.json`;
   let pollInterval = null;
   let lastJson = undefined;
-  // Intervalo de polling según el path
-  const interval = path.startsWith('players') ? 300 : 500;
+  const ms = path.startsWith('players') ? 300 : 400;
 
   return {
     set(data) {
       return fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
-        .catch(e => console.warn('FB set error', path, e));
+        .catch(e => console.warn('FB set', path, e));
     },
     update(data) {
       return fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
-        .catch(e => console.warn('FB update error', path, e));
+        .catch(e => console.warn('FB update', path, e));
     },
-    remove() {
-      return fetch(url, { method:'DELETE' }).catch(e => console.warn('FB remove error', path, e));
-    },
-    once() {
-      return fetch(url).then(r => r.json()).then(data => ({ val: () => data }));
-    },
+    remove() { return fetch(url, { method:'DELETE' }).catch(e => console.warn('FB remove', path, e)); },
+    once() { return fetch(url).then(r=>r.json()).then(d=>({ val:()=>d })); },
     on(evt, cb) {
-      const poll = () => {
-        fetch(url)
-          .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.json();
-          })
-          .then(data => {
-            const j = JSON.stringify(data);
-            if (j !== lastJson) {
-              lastJson = j;
-              cb({ val: () => data });
-            }
-          })
-          .catch(e => console.warn('FB poll error', path, e));
-      };
-      // Lectura inmediata
+      const poll = () => fetch(url).then(r=>r.json()).then(d=>{
+        const j = JSON.stringify(d);
+        if (j !== lastJson) { lastJson = j; cb({ val:()=>d }); }
+      }).catch(()=>{});
       poll();
-      pollInterval = setInterval(poll, interval);
+      pollInterval = setInterval(poll, ms);
     },
-    off() { if(pollInterval) { clearInterval(pollInterval); pollInterval = null; } }
+    off() { if(pollInterval){ clearInterval(pollInterval); pollInterval=null; } }
   };
-}
-
-// makeRef para un jugador específico (sin polling, solo escritura)
-function playerRef(id) {
-  return makeRef(`players/${id}`);
 }
 
 const refGame    = makeRef('game');
@@ -498,98 +476,81 @@ const refAction  = makeRef('action');
 // ESTADO
 // ================================================
 const PIN = '1234';
-
 const G = {
-  // Config
-  cards: [], deck: [], deckIdx: 0, currentCardIdx: -1,
-  timerSecs: 45, timerLeft: 45, timerInterval: null,
-  running: false, paused: false,
-  // Equipos
-  teams: [{ name:'AZULES', score:0 }, { name:'ROJOS', score:0 }],
-  // Ronda
-  round: 1,
-  currentTeam: 0,       // equipo que describe en este turno (0=A, 1=B)
-  turnWithinRound: 0,   // 0 = primer turno de la ronda, 1 = segundo (roles invertidos)
-  gamePhase: 'idle',    // idle | playing | ended | resultado
-  turnScore: 0,
-  // Jugadores activos este turno
-  jugadorActivo: null,  // { nombre, equipo }
-  juezActivo: null,
-  // Historial de quién ya jugó
-  yaJugaron: { a: [], b: [] },
-  rolesSwapped: false,
+  cards:[], deck:[], deckIdx:0, currentCardIdx:-1,
+  timerSecs:45, timerLeft:45, timerInterval:null,
+  running:false, paused:false,
+  teams:[{ name:'AZULES', score:0 }, { name:'ROJOS', score:0 }],
+  round:1, currentTeam:0, turnWithinRound:0,
+  gamePhase:'idle', turnScore:0,
+  jugadorActivo:null, juezActivo:null,
+  yaJugaron:{ a:[], b:[] },
+  rolesSwapped:false,
 };
 
 // ================================================
 // UTILS
 // ================================================
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
 function toast(msg, type='info') {
-  const c = document.getElementById('toasts');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`; t.textContent = msg;
-  c.appendChild(t); setTimeout(() => t.remove(), 2100);
+  const c=document.getElementById('toasts'), t=document.createElement('div');
+  t.className=`toast ${type}`; t.textContent=msg;
+  c.appendChild(t); setTimeout(()=>t.remove(), 2100);
 }
-
 function shuffle(arr) {
-  const a = [...arr];
-  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
 
 // ================================================
-// ROL
+// ROL / PIN
 // ================================================
 function elegirRol(rol) {
-  if (rol === 'coordinador') { showScreen('screen-pin'); setTimeout(() => document.getElementById('pin-input').focus(), 100); }
+  if (rol==='coordinador') { showScreen('screen-pin'); setTimeout(()=>document.getElementById('pin-input').focus(),100); }
   else { showScreen('screen-lobby'); actualizarLabelsLobby(); }
 }
-
 function verificarPin() {
-  const v = document.getElementById('pin-input').value;
-  if (v === PIN) { document.getElementById('pin-err').style.display='none'; showScreen('screen-setup'); }
+  const v=document.getElementById('pin-input').value;
+  if (v===PIN) { document.getElementById('pin-err').style.display='none'; showScreen('screen-setup'); }
   else { document.getElementById('pin-err').style.display='block'; document.getElementById('pin-input').value=''; document.getElementById('pin-input').focus(); }
 }
-document.getElementById('pin-input').addEventListener('keydown', e => { if(e.key==='Enter') verificarPin(); });
+document.getElementById('pin-input').addEventListener('keydown', e=>{ if(e.key==='Enter') verificarPin(); });
 
 // ================================================
 // SETUP
 // ================================================
-const uploadZone = document.getElementById('upload-zone');
-const fileInput  = document.getElementById('file-input');
-uploadZone.addEventListener('click', () => fileInput.click());
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor='var(--acento)'; });
-uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor=''; });
-uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.style.borderColor=''; loadFiles([...e.dataTransfer.files]); });
-fileInput.addEventListener('change', () => loadFiles([...fileInput.files]));
+const uploadZone=document.getElementById('upload-zone'), fileInput=document.getElementById('file-input');
+uploadZone.addEventListener('click',()=>fileInput.click());
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.style.borderColor='var(--acento)';});
+uploadZone.addEventListener('dragleave',()=>{uploadZone.style.borderColor='';});
+uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.style.borderColor='';loadFiles([...e.dataTransfer.files]);});
+fileInput.addEventListener('change',()=>loadFiles([...fileInput.files]));
 
 function loadFiles(files) {
-  const imgs = files.filter(f => f.type.startsWith('image/'));
-  if (!imgs.length) { toast('No se encontraron imágenes', 'err'); return; }
-  G.cards = []; let done = 0;
-  imgs.forEach(f => {
-    const r = new FileReader();
-    r.onload = e => { G.cards.push({ name:f.name, dataUrl:e.target.result }); if(++done===imgs.length) toast(`✅ ${G.cards.length} cartas`, 'ok'); };
+  const imgs=files.filter(f=>f.type.startsWith('image/'));
+  if (!imgs.length) { toast('No se encontraron imágenes','err'); return; }
+  G.cards=[]; let done=0;
+  imgs.forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{ G.cards.push({name:f.name,dataUrl:e.target.result}); if(++done===imgs.length) toast(`✅ ${G.cards.length} cartas`,'ok'); };
     r.readAsDataURL(f);
   });
 }
-
-document.querySelectorAll('.timer-btn').forEach(b => {
-  b.addEventListener('click', () => { document.querySelectorAll('.timer-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); G.timerSecs=parseInt(b.dataset.s); });
+document.querySelectorAll('.timer-btn').forEach(b=>{
+  b.addEventListener('click',()=>{ document.querySelectorAll('.timer-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); G.timerSecs=parseInt(b.dataset.s); });
 });
+document.getElementById('nombre-a').addEventListener('input',e=>{G.teams[0].name=e.target.value.trim().toUpperCase()||'AZULES'; actualizarLabelsLobby();});
+document.getElementById('nombre-b').addEventListener('input',e=>{G.teams[1].name=e.target.value.trim().toUpperCase()||'ROJOS'; actualizarLabelsLobby();});
 
-document.getElementById('nombre-a').addEventListener('input', e => { G.teams[0].name = e.target.value.trim().toUpperCase() || 'AZULES'; actualizarLabelsLobby(); });
-document.getElementById('nombre-b').addEventListener('input', e => { G.teams[1].name = e.target.value.trim().toUpperCase() || 'ROJOS'; actualizarLabelsLobby(); });
-
-document.getElementById('btn-ir-lobby').addEventListener('click', () => {
-  if (G.cards.length === 0) G.cards = CARTAS_EMBEBIDAS;
-  // Limpiar jugadores anteriores
-  refPlayers.set(null);
+document.getElementById('btn-ir-lobby').addEventListener('click',()=>{
+  if (G.cards.length===0) G.cards=CARTAS_EMBEBIDAS;
+  refPlayers.remove();
   refGame.set({ phase:'lobby', names:[G.teams[0].name, G.teams[1].name] });
+  refAction.remove();
   showScreen('screen-lobby-coord');
   escucharJugadores();
 });
@@ -598,145 +559,197 @@ document.getElementById('btn-ir-lobby').addEventListener('click', () => {
 // LOBBY
 // ================================================
 function actualizarLabelsLobby() {
-  document.getElementById('label-eq-a').textContent = G.teams[0].name;
-  document.getElementById('label-eq-b').textContent = G.teams[1].name;
+  document.getElementById('label-eq-a').textContent=G.teams[0].name;
+  document.getElementById('label-eq-b').textContent=G.teams[1].name;
 }
 
-// Jugador se une
-document.getElementById('btn-unirse-a').addEventListener('click', () => unirse(0));
-document.getElementById('btn-unirse-b').addEventListener('click', () => unirse(1));
+document.getElementById('btn-unirse-a').addEventListener('click',()=>unirse(0));
+document.getElementById('btn-unirse-b').addEventListener('click',()=>unirse(1));
 
 function unirse(equipo) {
-  const nombre = document.getElementById('nombre-jugador').value.trim();
-  if (!nombre) { toast('Escribí tu nombre primero', 'err'); return; }
-  const id = Date.now() + '_' + Math.random().toString(36).substr(2,5);
-  const jugador = { id, nombre, equipo, yaJugo: false };
-  // Guardar en Firebase
-  // Usar PATCH en el nodo padre para no pisar otros jugadores
+  const nombre=document.getElementById('nombre-jugador').value.trim();
+  if (!nombre) { toast('Escribí tu nombre primero','err'); return; }
+  const id='p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+  const jugador={ id, nombre, equipo };
+  // Guardar en Firebase con PATCH para no pisar otros jugadores
   makeRef('players').update({ [id]: jugador });
-  // Guardar localmente para identificarse
-  sessionStorage.setItem('tabu_jugador', JSON.stringify(jugador));
-  // Mostrar pantalla de espera
-  document.getElementById('espera-nombre').textContent = nombre;
-  const eqEl = document.getElementById('espera-equipo');
-  eqEl.textContent = equipo === 0 ? G.teams[0].name : G.teams[1].name;
-  eqEl.className = `espera-equipo ${equipo===0?'a':'b'}`;
+  // Guardar localmente — este es el objeto que usaremos para comparar IDs
+  sessionStorage.setItem('yo', JSON.stringify(jugador));
+  document.getElementById('espera-nombre').textContent=nombre;
+  const eqEl=document.getElementById('espera-equipo');
+  eqEl.textContent=equipo===0?G.teams[0].name:G.teams[1].name;
+  eqEl.className=`espera-equipo ${equipo===0?'a':'b'}`;
   showScreen('screen-espera');
-  // Escuchar inicio del juego
-  escucharInicioJuego();
+  escucharEstadoJuego();
 }
 
-// Coordinador escucha jugadores
-let jugadoresActuales = {};
+let jugadoresActuales={};
 function escucharJugadores() {
-  refPlayers.on('value', snap => {
-    jugadoresActuales = snap.val() || {};
+  refPlayers.on('value',snap=>{
+    jugadoresActuales=snap.val()||{};
     renderLobbyCoord();
   });
 }
 
 function renderLobbyCoord() {
-  const j = Object.values(jugadoresActuales);
-  const a = j.filter(p => p.equipo === 0);
-  const b = j.filter(p => p.equipo === 1);
-
-  const wrap = document.getElementById('lobby-equipos');
-  wrap.innerHTML = `
+  const j=Object.values(jugadoresActuales);
+  const a=j.filter(p=>p.equipo===0), b=j.filter(p=>p.equipo===1);
+  document.getElementById('lobby-equipos').innerHTML=`
     <div class="equipo-panel azul">
       <div class="equipo-title">🔵 ${G.teams[0].name} (${a.length})</div>
-      ${a.length ? a.map(p => `<div class="jugador-chip"><span class="chip-icon">👤</span>${p.nombre}</div>`).join('') : '<div class="equipo-vacio">Nadie aún...</div>'}
+      ${a.length?a.map(p=>`<div class="jugador-chip"><span class="chip-icon">👤</span>${p.nombre}</div>`).join(''):'<div class="equipo-vacio">Nadie aún...</div>'}
     </div>
     <div class="equipo-panel rojo">
       <div class="equipo-title">🔴 ${G.teams[1].name} (${b.length})</div>
-      ${b.length ? b.map(p => `<div class="jugador-chip"><span class="chip-icon">👤</span>${p.nombre}</div>`).join('') : '<div class="equipo-vacio">Nadie aún...</div>'}
-    </div>
-  `;
-
-  const btn = document.getElementById('btn-iniciar-juego');
-  btn.disabled = a.length === 0 || b.length === 0;
-  btn.textContent = (a.length === 0 || b.length === 0)
-    ? `🚀 Necesitás al menos 1 por equipo`
-    : `🚀 ¡Iniciar juego! (${j.length} jugadores)`;
+      ${b.length?b.map(p=>`<div class="jugador-chip"><span class="chip-icon">👤</span>${p.nombre}</div>`).join(''):'<div class="equipo-vacio">Nadie aún...</div>'}
+    </div>`;
+  const btn=document.getElementById('btn-iniciar-juego');
+  btn.disabled=a.length===0||b.length===0;
+  btn.textContent=(a.length===0||b.length===0)?'🚀 Necesitás al menos 1 por equipo':`🚀 ¡Iniciar juego! (${j.length} jugadores)`;
 }
 
-document.getElementById('btn-iniciar-juego').addEventListener('click', () => {
-  iniciarJuego();
-});
+document.getElementById('btn-iniciar-juego').addEventListener('click',iniciarJuego);
 
-// Jugador espera inicio - listener unificado que maneja todos los estados
-function escucharInicioJuego() {
-  let mobileApplyFn = null; // función apply de la vista móvil, null = no activo
+// ================================================
+// LISTENER DE JUGADORES (espera → juego)
+// ================================================
+function escucharEstadoJuego() {
+  // Leer nombres de equipos del juego en Firebase
+  refGame.once().then(snap=>{
+    const d=snap.val();
+    if (d && d.names) {
+      G.teams[0].name=d.names[0];
+      G.teams[1].name=d.names[1];
+      // Actualizar label del equipo en espera
+      const yo=JSON.parse(sessionStorage.getItem('yo')||'null');
+      if (yo) {
+        const eqEl=document.getElementById('espera-equipo');
+        eqEl.textContent=yo.equipo===0?d.names[0]:d.names[1];
+      }
+    }
+  });
 
-  refGame.on('value', snap => {
-    const d = snap.val();
+  refGame.on('value',snap=>{
+    const d=snap.val();
     if (!d) return;
-    const yo = JSON.parse(sessionStorage.getItem('tabu_jugador') || 'null');
+    const yo=JSON.parse(sessionStorage.getItem('yo')||'null');
     if (!yo) return;
 
-    // Pantalla final
-    if (d.phase === 'final') {
-      mobileApplyFn = null;
-      mostrarFinalJugador(d, yo);
+    if (d.phase==='resultado') {
+      mostrarResultadoMovil(d, yo);
       return;
     }
-
-    // Pantalla resultado entre rondas
-    if (d.phase === 'resultado') {
-      // Resetear siempre al llegar a resultado
-      mobileApplyFn = null;
-      mostrarResultadoJugadorMovil(d, yo);
+    if (d.phase==='final') {
+      mostrarFinalMovil(d, yo);
       return;
     }
+    if (d.phase==='playing'||d.phase==='idle'||d.phase==='ended') {
+      // Comparar IDs
+      const soyJugador = d.jugadorActivo && d.jugadorActivo.id===yo.id;
+      const soyJuez    = d.juezActivo    && d.juezActivo.id===yo.id;
 
-    // Fases de juego
-    if (d.phase === 'playing' || d.phase === 'idle' || d.phase === 'ended') {
-      const soyJugador = d.jugadorActivo && d.jugadorActivo.id === yo.id;
-      const soyJuez    = d.juezActivo    && d.juezActivo.id    === yo.id;
-      const soyActivo  = soyJugador || soyJuez;
-
-      if (soyActivo) {
-        // Soy el activo — iniciar o actualizar vista móvil
-        if (!mobileApplyFn) {
-          // Primera vez que soy activo en este turno
-          mobileApplyFn = iniciarVistaMovil(soyJuez ? 'juez' : 'jugador', yo);
+      if (soyJugador||soyJuez) {
+        if (!document.getElementById('screen-movil').classList.contains('active')) {
+          iniciarVistaMovil(soyJuez?'juez':'jugador', yo);
         }
-        mobileApplyFn(d);
+        actualizarVistaMovil(d, soyJuez);
       } else {
-        // NO soy el activo — asegurarme de estar en pantalla de espera
-        if (mobileApplyFn) {
-          // Estaba activo antes, resetear
-          mobileApplyFn = null;
-        }
-        // Mostrar pantalla de espera
-        if (!document.getElementById('screen-espera').classList.contains('active')) {
+        // No soy activo — volver a espera si estaba en móvil
+        if (document.getElementById('screen-movil').classList.contains('active')) {
           showScreen('screen-espera');
         }
-        const msg = document.getElementById('espera-turno-msg');
-        msg.style.display = 'block';
-        msg.textContent = '⏳ Esperando tu turno...';
+        const msg=document.getElementById('espera-turno-msg');
+        msg.style.display='block';
+        msg.textContent='⏳ Esperando tu turno...';
       }
     }
   });
 }
 
 // ================================================
-// INICIAR JUEGO
+// VISTA MÓVIL
+// ================================================
+let movilEsJuez=false;
+
+function iniciarVistaMovil(rol, yo) {
+  movilEsJuez = rol==='juez';
+  showScreen('screen-movil');
+
+  const hdr=document.getElementById('movil-hdr');
+  hdr.className=`movil-hdr ${movilEsJuez?'juez-hdr':'jugador-hdr'}`;
+  document.getElementById('movil-title').textContent=movilEsJuez?'⚖️ Vista Juez':'🗣️ Tu carta';
+  document.getElementById('movil-player-name').textContent=yo.nombre;
+  document.getElementById('movil-foot').textContent=movilEsJuez?'Controlá que no digan palabras prohibidas':'¡Describí sin decir las palabras de la carta!';
+
+  const actions=document.getElementById('movil-actions');
+  if (movilEsJuez) actions.classList.add('visible');
+  else actions.classList.remove('visible');
+
+  // Reasignar botones para evitar listeners duplicados
+  ['btn-mov-ok','btn-mov-tabu'].forEach(id=>{
+    const old=document.getElementById(id), nuevo=old.cloneNode(true);
+    old.parentNode.replaceChild(nuevo,old);
+  });
+  document.getElementById('btn-mov-ok').addEventListener('click',()=>{
+    refAction.set({action:'correcto',ts:Date.now()}); toast('✅ Enviado','ok');
+  });
+  document.getElementById('btn-mov-tabu').addEventListener('click',()=>{
+    refAction.set({action:'tabu',ts:Date.now()}); toast('🚫 Enviado','err');
+  });
+}
+
+let lastMovilCardIdx = -99;
+let lastMovilRolesSwapped = null;
+
+function actualizarVistaMovil(d, esJuezActual) {
+  // Detectar cambio de roles (mismo par, turno invertido)
+  if (lastMovilRolesSwapped!==null && d.rolesSwapped!==lastMovilRolesSwapped) {
+    movilEsJuez=!movilEsJuez;
+    const yo=JSON.parse(sessionStorage.getItem('yo')||'{}');
+    iniciarVistaMovil(movilEsJuez?'juez':'jugador', yo);
+    lastMovilCardIdx=-99; // forzar recarga
+    toast(`🔄 Ahora sos ${movilEsJuez?'Juez ⚖️':'Jugador 🗣️'}`,'info');
+  }
+  lastMovilRolesSwapped=d.rolesSwapped;
+
+  // Timer
+  const elapsed=(Date.now()-d.ts)/1000;
+  const left=d.running?Math.max(0,d.timerLeft-Math.floor(elapsed)):d.timerLeft;
+  const tel=document.getElementById('movil-timer');
+  tel.textContent=left; tel.classList.toggle('urgent',left<=10);
+  const bar=document.getElementById('movil-bar');
+  bar.style.width=(left/d.timerSecs*100)+'%'; bar.classList.toggle('urgent',left<=10);
+
+  // Carta
+  if (d.cardIdx!==lastMovilCardIdx) {
+    lastMovilCardIdx=d.cardIdx;
+    const img=document.getElementById('movil-img'), wait=document.getElementById('movil-wait');
+    if (d.phase==='playing'&&d.cardDataUrl) {
+      img.src=d.cardDataUrl; img.style.display='block'; wait.style.display='none';
+    } else {
+      img.style.display='none'; wait.style.display='flex';
+      wait.innerHTML=d.phase==='ended'?'<div class="wi">⏰</div><div>Fin del turno</div>':'<div class="wi">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div>';
+    }
+  }
+
+  // Botones juez
+  const bOk=document.getElementById('btn-mov-ok'), bTabu=document.getElementById('btn-mov-tabu');
+  if (movilEsJuez) {
+    const activo=d.phase==='playing'&&d.running&&!d.paused;
+    bOk.disabled=!activo; bTabu.disabled=!activo;
+  }
+}
+
+// ================================================
+// INICIAR JUEGO (coordinador)
 // ================================================
 function iniciarJuego() {
-  G.deck = shuffle(G.cards);
-  G.deckIdx = 0;
-  G.currentCardIdx = -1;
-  G.teams[0].score = 0; G.teams[1].score = 0;
-  G.round = 1;
-  G.turnWithinRound = 0;
-  G.currentTeam = 0;
-  G.timerLeft = G.timerSecs;
-  G.running = false;
-  G.paused = false;
-  G.turnScore = 0;
-  G.rolesSwapped = false;
-  G.yaJugaron = { a: [], b: [] };
-
+  G.deck=shuffle(G.cards); G.deckIdx=0; G.currentCardIdx=-1;
+  G.teams[0].score=0; G.teams[1].score=0;
+  G.round=1; G.turnWithinRound=0; G.currentTeam=0;
+  G.timerLeft=G.timerSecs; G.running=false; G.paused=false;
+  G.turnScore=0; G.rolesSwapped=false;
+  G.yaJugaron={a:[],b:[]};
   elegirPar();
   renderCoord();
   showScreen('screen-juego');
@@ -744,41 +757,31 @@ function iniciarJuego() {
 }
 
 // ================================================
-// ELEGIR PAR (jugador + juez)
+// ELEGIR PAR
 // ================================================
 function elegirPar() {
-  const todos = Object.values(jugadoresActuales);
-  const equipoA = todos.filter(p => p.equipo === 0);
-  const equipoB = todos.filter(p => p.equipo === 1);
+  const todos=Object.values(jugadoresActuales);
+  const eqA=todos.filter(p=>p.equipo===0), eqB=todos.filter(p=>p.equipo===1);
 
-  // Disponibles = los que no jugaron aún (con reposición si todos jugaron)
-  function disponibles(equipo) {
-    const yaJ = G.yaJugaron[equipo === 0 ? 'a' : 'b'];
-    let disp = equipo === 0 ? equipoA.filter(p => !yaJ.includes(p.id)) : equipoB.filter(p => !yaJ.includes(p.id));
-    if (disp.length === 0) {
-      // Todos jugaron, reset para este equipo
-      if (equipo === 0) G.yaJugaron.a = [];
-      else G.yaJugaron.b = [];
-      disp = equipo === 0 ? [...equipoA] : [...equipoB];
-    }
+  function disponibles(lista, yaJ) {
+    let disp=lista.filter(p=>!yaJ.includes(p.id));
+    if (!disp.length) { yaJ.length=0; disp=[...lista]; }
     return disp;
   }
 
-  const dispA = disponibles(0);
-  const dispB = disponibles(1);
+  const dispA=disponibles(eqA, G.yaJugaron.a);
+  const dispB=disponibles(eqB, G.yaJugaron.b);
+  const elegA=dispA[Math.floor(Math.random()*dispA.length)];
+  const elegB=dispB[Math.floor(Math.random()*dispB.length)];
 
-  const elegidoA = dispA[Math.floor(Math.random() * dispA.length)];
-  const elegidoB = dispB[Math.floor(Math.random() * dispB.length)];
+  G.jugadorActivo=elegA;  // A describe
+  G.juezActivo=elegB;     // B juzga
+  G.currentTeam=0;
+  G.turnWithinRound=0;
+  G.rolesSwapped=false;
 
-  // Turno 0: A describe, B juzga
-  G.jugadorActivo = elegidoA;
-  G.juezActivo = elegidoB;
-  G.currentTeam = 0;
-  G.turnWithinRound = 0;
-
-  // Registrar que jugaron
-  G.yaJugaron.a.push(elegidoA.id);
-  G.yaJugaron.b.push(elegidoB.id);
+  G.yaJugaron.a.push(elegA.id);
+  G.yaJugaron.b.push(elegB.id);
 
   publish();
 }
@@ -787,10 +790,10 @@ function elegirPar() {
 // PUBLICAR
 // ================================================
 function publish() {
-  const card = G.deck[G.currentCardIdx] || null;
+  const card=G.deck[G.currentCardIdx]||null;
   refGame.set({
-    phase: G.gamePhase === 'idle' ? 'idle' : G.gamePhase,
-    cardDataUrl: card ? card.dataUrl : null,
+    phase: G.gamePhase,
+    cardDataUrl: card?card.dataUrl:null,
     cardIdx: G.currentCardIdx,
     timerLeft: G.timerLeft,
     timerSecs: G.timerSecs,
@@ -801,14 +804,14 @@ function publish() {
     names: [G.teams[0].name, G.teams[1].name],
     currentTeam: G.currentTeam,
     rolesSwapped: G.rolesSwapped,
-    jugadorActivo: G.jugadorActivo,
+    jugadorActivo: G.jugadorActivo,   // { id, nombre, equipo }
     juezActivo: G.juezActivo,
     ts: Date.now(),
   });
 }
 
 // ================================================
-// LÓGICA DE TURNO
+// TURNO
 // ================================================
 document.getElementById('btn-iniciar').addEventListener('click', iniciarTurno);
 document.getElementById('btn-correcto').addEventListener('click', accionCorrecto);
@@ -816,105 +819,87 @@ document.getElementById('btn-tabu').addEventListener('click', accionTabu);
 document.getElementById('btn-pausa').addEventListener('click', togglePausa);
 document.getElementById('btn-reanudar').addEventListener('click', togglePausa);
 document.getElementById('btn-cambio').addEventListener('click', siguienteTurno);
-document.getElementById('btn-menu').addEventListener('click', () => {
-  clearInterval(G.timerInterval); G.running = false;
-  refGame.set(null); refPlayers.set(null); refAction.set(null);
+document.getElementById('btn-menu').addEventListener('click', ()=>{
+  clearInterval(G.timerInterval); G.running=false;
+  refGame.remove(); refPlayers.remove(); refAction.remove();
   showScreen('screen-bienvenida');
 });
-document.getElementById('btn-nueva-partida').addEventListener('click', () => {
-  refGame.set(null); refPlayers.set(null); refAction.set(null);
+document.getElementById('btn-nueva-partida').addEventListener('click', ()=>{
+  refGame.remove(); refPlayers.remove(); refAction.remove();
   showScreen('screen-bienvenida');
 });
 
 function iniciarTurno() {
-  G.gamePhase = 'playing';
-  G.turnScore = 0;
-  G.timerLeft = G.timerSecs;
-  G.paused = false;
-  siguienteCarta();
-  startTimer();
-  renderCoord();
-  publish();
+  G.gamePhase='playing'; G.turnScore=0;
+  G.timerLeft=G.timerSecs; G.paused=false;
+  siguienteCarta(); startTimer();
+  renderCoord(); publish();
 }
 
 function siguienteCarta() {
-  if (G.deckIdx >= G.deck.length) {
-    G.deck = shuffle(G.cards); G.deckIdx = 0;
-    toast('🔄 Nuevo mazo', 'info');
-  }
-  G.currentCardIdx = G.deckIdx++;
-  renderCartaCoord();
-  publish();
+  if (G.deckIdx>=G.deck.length) { G.deck=shuffle(G.cards); G.deckIdx=0; toast('🔄 Nuevo mazo','info'); }
+  G.currentCardIdx=G.deckIdx++;
+  renderCartaCoord(); publish();
 }
 
 function accionCorrecto() {
   if (!G.running) return;
-  G.teams[G.currentTeam].score++;
-  G.turnScore++;
-  renderPublico(true);
-  confetti();
-  toast(`✅ +1 punto`, 'ok');
+  G.teams[G.currentTeam].score++; G.turnScore++;
+  renderPublico(true); confetti(); toast(`✅ +1 punto`,'ok');
   siguienteCarta();
 }
 
 function accionTabu() {
   if (!G.running) return;
-  clearInterval(G.timerInterval); G.running = false;
-  G.gamePhase = 'ended';
-  toast(`🚫 ¡Tabú! Fin del turno`, 'err');
-  renderCoord();
-  publish();
+  clearInterval(G.timerInterval); G.running=false;
+  G.gamePhase='ended'; toast(`🚫 ¡Tabú! Fin del turno`,'err');
+  renderCoord(); publish();
 }
 
 function togglePausa() {
-  G.paused = !G.paused;
-  document.getElementById('overlay-pausa').classList.toggle('on', G.paused);
-  if (G.paused) { clearInterval(G.timerInterval); G.running = false; }
+  G.paused=!G.paused;
+  document.getElementById('overlay-pausa').classList.toggle('on',G.paused);
+  if (G.paused) { clearInterval(G.timerInterval); G.running=false; }
   else startTimerTick();
   publish();
 }
 
 function siguienteTurno() {
-  clearInterval(G.timerInterval); G.running = false;
-
-  if (G.turnWithinRound === 0) {
-    // Primer turno terminó → invertir roles para segundo turno
-    G.turnWithinRound = 1;
-    G.currentTeam = 1;
-    G.rolesSwapped = !G.rolesSwapped;
-    // Intercambiar jugador y juez
-    const temp = G.jugadorActivo;
-    G.jugadorActivo = G.juezActivo;
-    G.juezActivo = temp;
-    G.gamePhase = 'idle';
-    G.currentCardIdx = -1;
-    G.timerLeft = G.timerSecs;
-    renderCoord();
-    publish();
-    toast(`🔄 Turno del equipo ${G.teams[1].name}`, 'info');
+  clearInterval(G.timerInterval); G.running=false;
+  if (G.turnWithinRound===0) {
+    // Invertir roles: jugador ↔ juez
+    G.turnWithinRound=1;
+    G.currentTeam=1;
+    G.rolesSwapped=!G.rolesSwapped;
+    const temp=G.jugadorActivo; G.jugadorActivo=G.juezActivo; G.juezActivo=temp;
+    G.gamePhase='idle'; G.currentCardIdx=-1; G.timerLeft=G.timerSecs;
+    renderCoord(); publish();
+    toast(`🔄 Turno del equipo ${G.teams[1].name}`,'info');
   } else {
-    // Segundo turno terminó → fin de ronda
-    G.turnWithinRound = 0;
+    G.turnWithinRound=0;
     finRonda();
   }
 }
 
+// ================================================
+// FIN DE RONDA
+// ================================================
 function finRonda() {
-  G.gamePhase = 'resultado';
-  const todos = Object.values(jugadoresActuales);
-  const maxRondas = Math.max(todos.filter(p=>p.equipo===0).length, todos.filter(p=>p.equipo===1).length);
-  const hayMas = G.round < maxRondas ||
-    G.yaJugaron.a.length < todos.filter(p=>p.equipo===0).length ||
-    G.yaJugaron.b.length < todos.filter(p=>p.equipo===1).length;
+  G.gamePhase='resultado';
+  const todos=Object.values(jugadoresActuales);
+  const maxA=todos.filter(p=>p.equipo===0).length;
+  const maxB=todos.filter(p=>p.equipo===1).length;
+  const hayMas = G.yaJugaron.a.length < maxA || G.yaJugaron.b.length < maxB;
 
+  // Publicar resultado para que TODOS los celulares lo vean
   refGame.set({
     phase: 'resultado',
     scores: [G.teams[0].score, G.teams[1].score],
     names: [G.teams[0].name, G.teams[1].name],
     round: G.round,
+    hayMasRondas: hayMas,
     jugadorActivo: G.jugadorActivo,
     juezActivo: G.juezActivo,
-    hayMasRondas: hayMas,
     ts: Date.now(),
   });
 
@@ -922,251 +907,118 @@ function finRonda() {
   showScreen('screen-resultado');
 }
 
-// ================================================
-// RENDER RESULTADO (coordinador)
-// ================================================
 function renderResultado(hayMas) {
-  document.getElementById('res-title').textContent = `Fin de la ronda ${G.round}`;
-  document.getElementById('res-nom-a').textContent = G.teams[0].name;
-  document.getElementById('res-nom-b').textContent = G.teams[1].name;
-  document.getElementById('res-pts-a').textContent = G.teams[0].score;
-  document.getElementById('res-pts-b').textContent = G.teams[1].score;
-  document.getElementById('res-par').textContent = `Jugaron: ${G.jugadorActivo?.nombre} y ${G.juezActivo?.nombre}`;
-  document.getElementById('res-sub').textContent = hayMas ? `Quedan más rondas por jugar` : `¡Última ronda!`;
-  document.getElementById('btn-siguiente-ronda').style.display = hayMas ? 'block' : 'none';
+  document.getElementById('res-title').textContent=`Fin de la ronda ${G.round}`;
+  document.getElementById('res-nom-a').textContent=G.teams[0].name;
+  document.getElementById('res-nom-b').textContent=G.teams[1].name;
+  document.getElementById('res-pts-a').textContent=G.teams[0].score;
+  document.getElementById('res-pts-b').textContent=G.teams[1].score;
+  document.getElementById('res-par').textContent=`Jugaron: ${G.jugadorActivo?.nombre} y ${G.juezActivo?.nombre}`;
+  document.getElementById('res-sub').textContent=hayMas?'Quedan más rondas por jugar':'¡Última ronda!';
+  document.getElementById('btn-siguiente-ronda').style.display=hayMas?'block':'none';
 }
 
-document.getElementById('btn-siguiente-ronda').addEventListener('click', () => {
-  G.round++;
-  G.rolesSwapped = false;
-  G.gamePhase = 'idle';
-  G.currentCardIdx = -1;
-  G.timerLeft = G.timerSecs;
-  elegirPar();
-  renderCoord();
-  showScreen('screen-juego');
+document.getElementById('btn-siguiente-ronda').addEventListener('click',()=>{
+  G.round++; G.rolesSwapped=false; G.gamePhase='idle';
+  G.currentCardIdx=-1; G.timerLeft=G.timerSecs;
+  lastMovilCardIdx=-99; lastMovilRolesSwapped=null;
+  elegirPar(); renderCoord(); showScreen('screen-juego');
 });
 
-document.getElementById('btn-terminar-juego').addEventListener('click', () => {
-  mostrarFinal();
-});
+document.getElementById('btn-terminar-juego').addEventListener('click', mostrarFinal);
+
+// ================================================
+// RESULTADO EN MÓVIL
+// ================================================
+function mostrarResultadoMovil(d, yo) {
+  showScreen('screen-resultado');
+  document.getElementById('res-title').textContent=`Fin de la ronda ${d.round}`;
+  document.getElementById('res-nom-a').textContent=d.names[0];
+  document.getElementById('res-nom-b').textContent=d.names[1];
+  document.getElementById('res-pts-a').textContent=d.scores[0];
+  document.getElementById('res-pts-b').textContent=d.scores[1];
+  document.getElementById('res-par').textContent=
+    d.jugadorActivo&&d.juezActivo?`Jugaron: ${d.jugadorActivo.nombre} y ${d.juezActivo.nombre}`:'';
+  document.getElementById('res-sub').textContent=d.hayMasRondas?'Quedan más rondas por jugar':'¡Última ronda!';
+  // Jugadores no pueden avanzar
+  document.getElementById('btn-siguiente-ronda').style.display='none';
+  document.getElementById('btn-terminar-juego').style.display='none';
+}
+
+// ================================================
+// FINAL
+// ================================================
+function mostrarFinal() {
+  const tied=G.teams[0].score===G.teams[1].score;
+  const w=G.teams[0].score>=G.teams[1].score?0:1;
+  document.getElementById('final-winner').textContent=tied?'🤝 ¡Empate!':`🎉 ¡Ganó ${G.teams[w].name}!`;
+  document.getElementById('final-scores').innerHTML=G.teams.map((t,i)=>{
+    const win=!tied&&i===w;
+    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${t.name}</div><div class="fs-pts">${t.score}</div><div style="font-size:.72rem;opacity:.7">puntos</div></div>`;
+  }).join('');
+  refGame.set({ phase:'final', scores:[G.teams[0].score,G.teams[1].score], names:[G.teams[0].name,G.teams[1].name], ts:Date.now() });
+  showScreen('screen-final');
+  setTimeout(confetti,300);
+}
+
+function mostrarFinalMovil(d, yo) {
+  showScreen('screen-final');
+  const tied=d.scores[0]===d.scores[1];
+  const w=d.scores[0]>d.scores[1]?0:1;
+  const miEquipo=yo?yo.equipo:-1;
+  let msg='';
+  if (tied) msg='🤝 ¡Empate!';
+  else if (miEquipo===w) msg=`🏆 ¡Tu equipo ganó, ${yo?yo.nombre:''}!`;
+  else msg=`😔 Esta vez no fue, ${yo?yo.nombre:''}. ¡La próxima!`;
+  document.getElementById('final-winner').textContent=msg;
+  document.getElementById('final-scores').innerHTML=d.names.map((n,i)=>{
+    const win=!tied&&i===w;
+    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${n}</div><div class="fs-pts">${d.scores[i]}</div><div style="font-size:.72rem;opacity:.7">puntos</div></div>`;
+  }).join('');
+  if (!tied&&miEquipo===w) setTimeout(confetti,300);
+}
 
 // ================================================
 // TIMER
 // ================================================
-function startTimer() {
-  clearInterval(G.timerInterval); G.running = true;
-  startTimerTick();
-}
-
+function startTimer() { clearInterval(G.timerInterval); G.running=true; startTimerTick(); }
 function startTimerTick() {
-  G.running = true;
-  G.timerInterval = setInterval(() => {
+  G.running=true;
+  G.timerInterval=setInterval(()=>{
     if (G.paused) return;
     G.timerLeft--;
     renderTimerPublico(G.timerLeft);
     publish();
-    if (G.timerLeft <= 0) {
-      clearInterval(G.timerInterval); G.running = false;
-      G.gamePhase = 'ended';
-      playAlarm();
-      toast(`⏰ ¡Tiempo! ${G.teams[G.currentTeam].name} sumó ${G.turnScore} pts`, 'info');
-      renderCoord();
-      publish();
+    if (G.timerLeft<=0) {
+      clearInterval(G.timerInterval); G.running=false;
+      G.gamePhase='ended'; playAlarm();
+      toast(`⏰ ¡Tiempo! ${G.teams[G.currentTeam].name} sumó ${G.turnScore} pts`,'info');
+      renderCoord(); publish();
     }
-  }, 1000);
+  },1000);
 }
-
 function playAlarm() {
   try {
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    [0,.15,.3,.45,.6,.75].forEach((t,i) => {
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    [0,.15,.3,.45,.6,.75].forEach((t,i)=>{
       const o=ctx.createOscillator(),g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);
-      o.frequency.value=i%2===0?880:660;o.type='square';
+      o.frequency.value=i%2===0?880:660; o.type='square';
       g.gain.setValueAtTime(.3,ctx.currentTime+t);
       g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.12);
-      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.15);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+.15);
     });
   } catch(e){}
 }
 
 // ================================================
-// RENDER COORDINADOR
-// ================================================
-function renderCoord() {
-  renderPublico();
-  renderCartaCoord();
-  document.getElementById('ctrl-idle').style.display    = G.gamePhase==='idle'    ? 'block' : 'none';
-  document.getElementById('ctrl-playing').style.display = G.gamePhase==='playing' ? 'block' : 'none';
-  document.getElementById('ctrl-ended').style.display   = G.gamePhase==='ended'   ? 'block' : 'none';
-
-  // Jugadores activos
-  const wrap = document.getElementById('activos-wrap');
-  if (G.jugadorActivo && G.juezActivo) {
-    wrap.style.display = 'flex';
-    document.getElementById('activo-jugador').textContent = G.jugadorActivo.nombre;
-    document.getElementById('activo-juez').textContent = G.juezActivo.nombre;
-  }
-
-  document.getElementById('round-badge').textContent = `Ronda ${G.round} · Turno ${G.turnWithinRound+1}/2`;
-}
-
-function renderCartaCoord() {
-  const img = document.getElementById('coord-img');
-  const ph  = document.getElementById('coord-ph');
-  const card = G.deck[G.currentCardIdx];
-  if (card) {
-    img.src=card.dataUrl; img.style.display='block'; ph.style.display='none';
-    document.getElementById('card-counter').textContent = `Carta ${G.deckIdx} de ${G.deck.length}`;
-  } else {
-    img.style.display='none'; ph.style.display='flex';
-    document.getElementById('card-counter').textContent='';
-  }
-}
-
-function renderPublico(animate) {
-  document.getElementById('pub-nom-a').textContent = G.teams[0].name;
-  document.getElementById('pub-nom-b').textContent = G.teams[1].name;
-  const pA = document.getElementById('pub-pts-a');
-  const pB = document.getElementById('pub-pts-b');
-  pA.textContent = G.teams[0].score;
-  pB.textContent = G.teams[1].score;
-  if (animate) {
-    const el = G.currentTeam===0 ? pA : pB;
-    el.classList.remove('score-pop'); void el.offsetWidth; el.classList.add('score-pop');
-  }
-  document.getElementById('score-a').classList.toggle('activo', G.currentTeam===0 && G.gamePhase==='playing');
-  document.getElementById('score-b').classList.toggle('activo', G.currentTeam===1 && G.gamePhase==='playing');
-  renderTimerPublico(G.timerLeft);
-  const badge = document.getElementById('status-badge');
-  const st = {idle:'⏳ Esperando turno', playing:'🟢 Ronda en curso', ended:'⏰ Fin del turno'};
-  badge.textContent = st[G.gamePhase]||'⏳ Esperando turno';
-  badge.className = 'status-badge '+(G.gamePhase==='playing'?'playing':G.gamePhase==='ended'?'ended':'waiting');
-  document.getElementById('round-badge').textContent = `Ronda ${G.round} · Turno ${G.turnWithinRound+1}/2`;
-}
-
-function renderTimerPublico(s) {
-  const num=document.getElementById('timer-num'), ring=document.getElementById('ring-fg');
-  const circ=2*Math.PI*70;
-  num.textContent=s;
-  ring.style.strokeDashoffset=circ*(1-s/G.timerSecs);
-  num.classList.toggle('urgent',s<=10);
-  ring.style.stroke=s<=10?'#e84f4f':s<=20?'#f39c12':'#2ecc71';
-}
-
-function confetti() {
-  const area=document.getElementById('confetti-area');
-  ['#f7c948','#2ecc71','#4f5fe8','#e84f4f','#fff'].forEach(c => {
-    for(let j=0;j<4;j++){
-      const p=document.createElement('div'); p.className='cp';
-      p.style.cssText=`left:${Math.random()*100}%;background:${c};animation-duration:${.8+Math.random()*1.2}s;animation-delay:${Math.random()*.3}s;`;
-      area.appendChild(p); setTimeout(()=>p.remove(),2000);
-    }
-  });
-}
-
-// ================================================
-// VISTA MÓVIL
-// ================================================
-function iniciarVistaMovil(rol, yo) {
-  let esJuez = rol === 'juez';
-  showScreen('screen-movil');
-
-  function actualizarHeaderMovil() {
-    const hdr = document.getElementById('movil-hdr');
-    hdr.className = `movil-hdr ${esJuez ? 'juez-hdr' : 'jugador-hdr'}`;
-    document.getElementById('movil-title').textContent = esJuez ? '⚖️ Vista Juez' : '🗣️ Tu carta';
-    document.getElementById('movil-player-name').textContent = yo.nombre;
-    document.getElementById('movil-foot').textContent = esJuez
-      ? 'Controlá que no digan palabras prohibidas'
-      : '¡Describí sin decir las palabras de la carta!';
-    const actions = document.getElementById('movil-actions');
-    if (esJuez) actions.classList.add('visible');
-    else actions.classList.remove('visible');
-  }
-
-  actualizarHeaderMovil();
-
-  // Botones juez — remover listeners anteriores clonando el nodo
-  const btnOk   = document.getElementById('btn-mov-ok');
-  const btnTabu = document.getElementById('btn-mov-tabu');
-  const btnOkNew   = btnOk.cloneNode(true);
-  const btnTabuNew = btnTabu.cloneNode(true);
-  btnOk.parentNode.replaceChild(btnOkNew, btnOk);
-  btnTabu.parentNode.replaceChild(btnTabuNew, btnTabu);
-
-  btnOkNew.addEventListener('click', () => {
-    refAction.set({ action:'correcto', ts:Date.now() });
-    toast('✅ Enviado', 'ok');
-  });
-  btnTabuNew.addEventListener('click', () => {
-    refAction.set({ action:'tabu', ts:Date.now() });
-    toast('🚫 Enviado', 'err');
-  });
-
-  let lastCardIdx = -2;
-  let lastRolesSwapped = null;
-
-  // Devolver función apply para que el listener externo la use
-  function apply(d) {
-    if (!d) return;
-
-    // Detectar cambio de roles
-    if (lastRolesSwapped !== null && d.rolesSwapped !== lastRolesSwapped) {
-      esJuez = !esJuez;
-      actualizarHeaderMovil();
-      toast(`🔄 Ahora sos ${esJuez ? 'Juez ⚖️' : 'Jugador 🗣️'}`, 'info');
-      lastCardIdx = -2; // forzar recarga de carta
-    }
-    lastRolesSwapped = d.rolesSwapped;
-
-    // Timer
-    const elapsed = (Date.now()-d.ts)/1000;
-    const left = d.running ? Math.max(0, d.timerLeft-Math.floor(elapsed)) : d.timerLeft;
-    const tel = document.getElementById('movil-timer');
-    tel.textContent = left;
-    tel.classList.toggle('urgent', left<=10);
-    const bar = document.getElementById('movil-bar');
-    bar.style.width = (left/d.timerSecs*100)+'%';
-    bar.classList.toggle('urgent', left<=10);
-
-    // Carta
-    if (d.cardIdx !== lastCardIdx) {
-      lastCardIdx = d.cardIdx;
-      const img  = document.getElementById('movil-img');
-      const wait = document.getElementById('movil-wait');
-      if (d.phase === 'playing' && d.cardDataUrl) {
-        img.src = d.cardDataUrl; img.style.display='block'; wait.style.display='none';
-      } else {
-        img.style.display='none'; wait.style.display='flex';
-        wait.innerHTML = d.phase==='ended'
-          ? '<div class="wi">⏰</div><div>Fin del turno</div>'
-          : '<div class="wi">⏳</div><div>Esperando que el coordinador<br>inicie el turno...</div>';
-      }
-    }
-
-    // Botones juez
-    const bOk   = document.getElementById('btn-mov-ok');
-    const bTabu = document.getElementById('btn-mov-tabu');
-    if (esJuez) {
-      const activo = d.phase==='playing' && d.running && !d.paused;
-      bOk.disabled = !activo;
-      bTabu.disabled = !activo;
-    }
-  }
-
-  return apply;
-}
-
-// ================================================
-// ESCUCHAR ACCIONES DEL JUEZ (coordinador)
+// ACCIONES DEL JUEZ → COORDINADOR
 // ================================================
 function escucharAccionesJuez() {
-  refAction.on('value', snap => {
-    const d = snap.val();
+  refAction.on('value',snap=>{
+    const d=snap.val();
     if (!d) return;
-    if (Date.now()-d.ts > 4000) return;
+    if (Date.now()-d.ts>4000) return;
     if (!document.getElementById('screen-juego').classList.contains('active')) return;
     refAction.remove();
     if (d.action==='correcto') accionCorrecto();
@@ -1175,67 +1027,71 @@ function escucharAccionesJuez() {
 }
 
 // ================================================
-// RESULTADO JUGADOR (vista móvil/espera)
+// RENDER COORDINADOR
 // ================================================
-function mostrarResultadoJugadorMovil(d, yo) {
-  showScreen('screen-resultado');
-  document.getElementById('res-title').textContent = `Fin de la ronda ${d.round}`;
-  document.getElementById('res-nom-a').textContent = d.names[0];
-  document.getElementById('res-nom-b').textContent = d.names[1];
-  document.getElementById('res-pts-a').textContent = d.scores[0];
-  document.getElementById('res-pts-b').textContent = d.scores[1];
-  document.getElementById('res-par').textContent = d.jugadorActivo && d.juezActivo
-    ? `Jugaron: ${d.jugadorActivo.nombre} y ${d.juezActivo.nombre}` : '';
-  document.getElementById('res-sub').textContent = d.hayMasRondas ? 'Quedan más rondas por jugar' : '¡Última ronda!';
-  // Ocultar botones — solo coordinador avanza
-  document.getElementById('btn-siguiente-ronda').style.display = 'none';
-  document.getElementById('btn-terminar-juego').style.display = 'none';
-}
-
-function mostrarFinalJugador(d, yo) {
-  showScreen('screen-final');
-  const tied   = d.scores[0] === d.scores[1];
-  const winner = d.scores[0] > d.scores[1] ? 0 : 1;
-  const miEquipo = yo ? yo.equipo : -1;
-
-  let msg = '';
-  if (tied) {
-    msg = '🤝 ¡Empate!';
-  } else if (miEquipo === winner) {
-    msg = `🏆 ¡Tu equipo ganó, ${yo ? yo.nombre : ''}!`;
-  } else {
-    msg = `😔 Esta vez no fue, ${yo ? yo.nombre : ''}. ¡La próxima!`;
+function renderCoord() {
+  renderPublico();
+  renderCartaCoord();
+  document.getElementById('ctrl-idle').style.display    =G.gamePhase==='idle'   ?'block':'none';
+  document.getElementById('ctrl-playing').style.display =G.gamePhase==='playing'?'block':'none';
+  document.getElementById('ctrl-ended').style.display   =G.gamePhase==='ended'  ?'block':'none';
+  const wrap=document.getElementById('activos-wrap');
+  if (G.jugadorActivo&&G.juezActivo) {
+    wrap.style.display='flex';
+    document.getElementById('activo-jugador').textContent=G.jugadorActivo.nombre;
+    document.getElementById('activo-juez').textContent=G.juezActivo.nombre;
   }
-  document.getElementById('final-winner').textContent = msg;
-  document.getElementById('final-scores').innerHTML = d.names.map((n,i) => {
-    const win = !tied && i===winner;
-    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${n}</div><div class="fs-pts">${d.scores[i]}</div><div style="font-size:.72rem;opacity:.7">puntos</div></div>`;
-  }).join('');
-  if (!tied && miEquipo === winner) setTimeout(confetti, 300);
+  document.getElementById('round-badge').textContent=`Ronda ${G.round} · Turno ${G.turnWithinRound+1}/2`;
 }
 
-// ================================================
-// FINAL
-// ================================================
-function mostrarFinal(d) {
-  const datos = d || { scores:[G.teams[0].score,G.teams[1].score], names:[G.teams[0].name,G.teams[1].name] };
-  const tied = datos.scores[0]===datos.scores[1];
-  const w = datos.scores[0]>=datos.scores[1]?0:1;
-  document.getElementById('final-winner').textContent = tied ? '🤝 ¡Empate!' : `🎉 ¡Ganó ${datos.names[w]}!`;
-  document.getElementById('final-scores').innerHTML = datos.names.map((n,i) => {
-    const win = !tied && i===w;
-    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${n}</div><div class="fs-pts">${datos.scores[i]}</div><div style="font-size:.72rem;opacity:.7">puntos</div></div>`;
-  }).join('');
+function renderCartaCoord() {
+  const img=document.getElementById('coord-img'), ph=document.getElementById('coord-ph');
+  const card=G.deck[G.currentCardIdx];
+  if (card) {
+    img.src=card.dataUrl; img.style.display='block'; ph.style.display='none';
+    document.getElementById('card-counter').textContent=`Carta ${G.deckIdx} de ${G.deck.length}`;
+  } else {
+    img.style.display='none'; ph.style.display='flex';
+    document.getElementById('card-counter').textContent='';
+  }
+}
 
-  // Publicar fase final para que todos los celulares la reciban
-  refGame.set({
-    phase: 'final',
-    scores: datos.scores,
-    names: datos.names,
-    ts: Date.now(),
+function renderPublico(animate) {
+  document.getElementById('pub-nom-a').textContent=G.teams[0].name;
+  document.getElementById('pub-nom-b').textContent=G.teams[1].name;
+  const pA=document.getElementById('pub-pts-a'), pB=document.getElementById('pub-pts-b');
+  pA.textContent=G.teams[0].score; pB.textContent=G.teams[1].score;
+  if (animate) {
+    const el=G.currentTeam===0?pA:pB;
+    el.classList.remove('score-pop'); void el.offsetWidth; el.classList.add('score-pop');
+  }
+  document.getElementById('score-a').classList.toggle('activo',G.currentTeam===0&&G.gamePhase==='playing');
+  document.getElementById('score-b').classList.toggle('activo',G.currentTeam===1&&G.gamePhase==='playing');
+  renderTimerPublico(G.timerLeft);
+  const badge=document.getElementById('status-badge');
+  const st={idle:'⏳ Esperando turno',playing:'🟢 Ronda en curso',ended:'⏰ Fin del turno',resultado:'📊 Fin de ronda'};
+  badge.textContent=st[G.gamePhase]||'⏳';
+  badge.className='status-badge '+(G.gamePhase==='playing'?'playing':G.gamePhase==='ended'?'ended':'waiting');
+  document.getElementById('round-badge').textContent=`Ronda ${G.round} · Turno ${G.turnWithinRound+1}/2`;
+}
+
+function renderTimerPublico(s) {
+  const num=document.getElementById('timer-num'), ring=document.getElementById('ring-fg');
+  const circ=2*Math.PI*70;
+  num.textContent=s; ring.style.strokeDashoffset=circ*(1-s/G.timerSecs);
+  num.classList.toggle('urgent',s<=10);
+  ring.style.stroke=s<=10?'#e84f4f':s<=20?'#f39c12':'#2ecc71';
+}
+
+function confetti() {
+  const area=document.getElementById('confetti-area');
+  ['#f7c948','#2ecc71','#4f5fe8','#e84f4f','#fff'].forEach(c=>{
+    for(let j=0;j<4;j++){
+      const p=document.createElement('div'); p.className='cp';
+      p.style.cssText=`left:${Math.random()*100}%;background:${c};animation-duration:${.8+Math.random()*1.2}s;animation-delay:${Math.random()*.3}s;`;
+      area.appendChild(p); setTimeout(()=>p.remove(),2000);
+    }
   });
-  showScreen('screen-final');
-  setTimeout(confetti, 300);
 }
 
 // ================================================
