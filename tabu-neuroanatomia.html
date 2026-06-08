@@ -443,34 +443,51 @@ function makeRef(path) {
   const url = `${FB_URL}/${path}.json`;
   let pollInterval = null;
   let lastJson = undefined;
+  // Intervalo de polling según el path
+  const interval = path.startsWith('players') ? 300 : 500;
 
   return {
     set(data) {
       return fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
-        .catch(e => console.warn('FB set error', e));
+        .catch(e => console.warn('FB set error', path, e));
     },
     update(data) {
       return fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
-        .catch(e => console.warn('FB update error', e));
+        .catch(e => console.warn('FB update error', path, e));
     },
     remove() {
-      return fetch(url, { method:'DELETE' }).catch(e => console.warn('FB remove error', e));
+      return fetch(url, { method:'DELETE' }).catch(e => console.warn('FB remove error', path, e));
     },
     once() {
       return fetch(url).then(r => r.json()).then(data => ({ val: () => data }));
     },
     on(evt, cb) {
       const poll = () => {
-        fetch(url).then(r => r.json()).then(data => {
-          const j = JSON.stringify(data);
-          if (j !== lastJson) { lastJson = j; cb({ val: () => data }); }
-        }).catch(() => {});
+        fetch(url)
+          .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(data => {
+            const j = JSON.stringify(data);
+            if (j !== lastJson) {
+              lastJson = j;
+              cb({ val: () => data });
+            }
+          })
+          .catch(e => console.warn('FB poll error', path, e));
       };
+      // Lectura inmediata
       poll();
-      pollInterval = setInterval(poll, 500);
+      pollInterval = setInterval(poll, interval);
     },
     off() { if(pollInterval) { clearInterval(pollInterval); pollInterval = null; } }
   };
+}
+
+// makeRef para un jugador específico (sin polling, solo escritura)
+function playerRef(id) {
+  return makeRef(`players/${id}`);
 }
 
 const refGame    = makeRef('game');
@@ -595,7 +612,8 @@ function unirse(equipo) {
   const id = Date.now() + '_' + Math.random().toString(36).substr(2,5);
   const jugador = { id, nombre, equipo, yaJugo: false };
   // Guardar en Firebase
-  makeRef(`players/${id}`).set(jugador);
+  // Usar PATCH en el nodo padre para no pisar otros jugadores
+  makeRef('players').update({ [id]: jugador });
   // Guardar localmente para identificarse
   sessionStorage.setItem('tabu_jugador', JSON.stringify(jugador));
   // Mostrar pantalla de espera
@@ -645,33 +663,62 @@ document.getElementById('btn-iniciar-juego').addEventListener('click', () => {
   iniciarJuego();
 });
 
-// Jugador espera inicio
+// Jugador espera inicio - listener unificado que maneja todos los estados
 function escucharInicioJuego() {
+  let yaEnVistaMovil = false;
+  let mobileApplyFn = null; // función apply de la vista móvil
+
   refGame.on('value', snap => {
     const d = snap.val();
     if (!d) return;
-    if (d.phase === 'playing' || d.phase === 'idle') {
+    const yo = JSON.parse(sessionStorage.getItem('tabu_jugador') || 'null');
+    if (!yo) return;
+
+    // Si ya tenemos la función apply de la vista móvil, usarla directamente
+    if (mobileApplyFn) {
+      mobileApplyFn(d);
+      return;
+    }
+
+    if (d.phase === 'resultado') {
+      mostrarResultadoJugadorMovil(d);
+      return;
+    }
+
+    if (d.phase === 'final') {
+      mostrarFinal(d);
+      return;
+    }
+
+    if (d.phase === 'playing' || d.phase === 'idle' || d.phase === 'ended') {
       // Revisar si este jugador es el activo
-      const yo = JSON.parse(sessionStorage.getItem('tabu_jugador') || 'null');
-      if (!yo) return;
-      if (d.jugadorActivo && d.jugadorActivo.id === yo.id) {
-        iniciarVistaMovil('jugador', yo, d);
-      } else if (d.juezActivo && d.juezActivo.id === yo.id) {
-        iniciarVistaMovil('juez', yo, d);
+      const soyJugador = d.jugadorActivo && d.jugadorActivo.id === yo.id;
+      const soyJuez    = d.juezActivo    && d.juezActivo.id    === yo.id;
+
+      if (soyJugador || soyJuez) {
+        if (!yaEnVistaMovil) {
+          yaEnVistaMovil = true;
+          // iniciarVistaMovil devuelve la función apply para uso futuro
+          mobileApplyFn = iniciarVistaMovil(soyJuez ? 'juez' : 'jugador', yo);
+          mobileApplyFn(d);
+        }
       } else {
-        // No es el activo, seguir esperando o actualizar mensaje
-        const msg = document.getElementById('espera-turno-msg');
-        if (d.phase !== 'lobby') {
+        // No es el activo en este turno
+        if (document.getElementById('screen-espera').classList.contains('active')) {
+          const msg = document.getElementById('espera-turno-msg');
           msg.style.display = 'block';
           msg.textContent = '⏳ Esperando tu turno...';
         }
+        // Si estaba en vista móvil y ya no es activo, volver a espera
+        if (yaEnVistaMovil) {
+          yaEnVistaMovil = false;
+          mobileApplyFn = null;
+          showScreen('screen-espera');
+          const msg = document.getElementById('espera-turno-msg');
+          msg.style.display = 'block';
+          msg.textContent = '⏳ Esperando tu próximo turno...';
+        }
       }
-    } else if (d.phase === 'resultado') {
-      // Mostrar pantalla resultado para jugadores
-      const yo = JSON.parse(sessionStorage.getItem('tabu_jugador') || 'null');
-      if (yo) mostrarResultadoJugador(d);
-    } else if (d.phase === 'final') {
-      mostrarFinal(d);
     }
   });
 }
@@ -1026,7 +1073,7 @@ function confetti() {
 // ================================================
 // VISTA MÓVIL
 // ================================================
-function iniciarVistaMovil(rol, yo, estadoInicial) {
+function iniciarVistaMovil(rol, yo) {
   let esJuez = rol === 'juez';
   showScreen('screen-movil');
 
@@ -1045,12 +1092,19 @@ function iniciarVistaMovil(rol, yo, estadoInicial) {
 
   actualizarHeaderMovil();
 
-  // Botones juez
-  document.getElementById('btn-mov-ok').addEventListener('click', () => {
+  // Botones juez — remover listeners anteriores clonando el nodo
+  const btnOk   = document.getElementById('btn-mov-ok');
+  const btnTabu = document.getElementById('btn-mov-tabu');
+  const btnOkNew   = btnOk.cloneNode(true);
+  const btnTabuNew = btnTabu.cloneNode(true);
+  btnOk.parentNode.replaceChild(btnOkNew, btnOk);
+  btnTabu.parentNode.replaceChild(btnTabuNew, btnTabu);
+
+  btnOkNew.addEventListener('click', () => {
     refAction.set({ action:'correcto', ts:Date.now() });
     toast('✅ Enviado', 'ok');
   });
-  document.getElementById('btn-mov-tabu').addEventListener('click', () => {
+  btnTabuNew.addEventListener('click', () => {
     refAction.set({ action:'tabu', ts:Date.now() });
     toast('🚫 Enviado', 'err');
   });
@@ -1058,6 +1112,7 @@ function iniciarVistaMovil(rol, yo, estadoInicial) {
   let lastCardIdx = -2;
   let lastRolesSwapped = null;
 
+  // Devolver función apply para que el listener externo la use
   function apply(d) {
     if (!d) return;
 
@@ -1066,6 +1121,7 @@ function iniciarVistaMovil(rol, yo, estadoInicial) {
       esJuez = !esJuez;
       actualizarHeaderMovil();
       toast(`🔄 Ahora sos ${esJuez ? 'Juez ⚖️' : 'Jugador 🗣️'}`, 'info');
+      lastCardIdx = -2; // forzar recarga de carta
     }
     lastRolesSwapped = d.rolesSwapped;
 
@@ -1095,18 +1151,16 @@ function iniciarVistaMovil(rol, yo, estadoInicial) {
     }
 
     // Botones juez
+    const bOk   = document.getElementById('btn-mov-ok');
+    const bTabu = document.getElementById('btn-mov-tabu');
     if (esJuez) {
       const activo = d.phase==='playing' && d.running && !d.paused;
-      document.getElementById('btn-mov-ok').disabled = !activo;
-      document.getElementById('btn-mov-tabu').disabled = !activo;
+      bOk.disabled = !activo;
+      bTabu.disabled = !activo;
     }
-
-    // Ir a resultado
-    if (d.phase === 'resultado') mostrarResultadoJugador(d);
-    if (d.phase === 'final') mostrarFinal(d);
   }
 
-  refGame.on('value', snap => { if(snap.val()) apply(snap.val()); });
+  return apply;
 }
 
 // ================================================
@@ -1125,15 +1179,22 @@ function escucharAccionesJuez() {
 }
 
 // ================================================
-// RESULTADO JUGADOR
+// RESULTADO JUGADOR (vista móvil/espera)
 // ================================================
-function mostrarResultadoJugador(d) {
-  // Los jugadores ven una pantalla simple de espera entre rondas
-  const msg = document.getElementById('espera-turno-msg');
-  if (document.getElementById('screen-espera').classList.contains('active')) {
-    msg.style.display = 'block';
-    msg.textContent = `📊 Ronda ${d.round} terminada. Azules: ${d.scores[0]} - Rojos: ${d.scores[1]}`;
-  }
+function mostrarResultadoJugadorMovil(d) {
+  // Mostrar pantalla de resultado también en móviles
+  showScreen('screen-resultado');
+  document.getElementById('res-title').textContent = `Fin de la ronda ${d.round}`;
+  document.getElementById('res-nom-a').textContent = d.names[0];
+  document.getElementById('res-nom-b').textContent = d.names[1];
+  document.getElementById('res-pts-a').textContent = d.scores[0];
+  document.getElementById('res-pts-b').textContent = d.scores[1];
+  document.getElementById('res-par').textContent = d.jugadorActivo && d.juezActivo
+    ? `Jugaron: ${d.jugadorActivo.nombre} y ${d.juezActivo.nombre}` : '';
+  document.getElementById('res-sub').textContent = d.hayMasRondas ? 'Quedan más rondas' : '¡Última ronda!';
+  // Ocultar botones en móvil (solo coordinador avanza)
+  document.getElementById('btn-siguiente-ronda').style.display = 'none';
+  document.getElementById('btn-terminar-juego').style.display = 'none';
 }
 
 // ================================================
