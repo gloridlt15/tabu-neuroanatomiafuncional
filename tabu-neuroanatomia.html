@@ -644,23 +644,36 @@ function escucharEstadoJuego() {
       return;
     }
     if (d.phase==='playing'||d.phase==='idle'||d.phase==='ended') {
-      // Comparar IDs
       const soyJugador = d.jugadorActivo && d.jugadorActivo.id===yo.id;
       const soyJuez    = d.juezActivo    && d.juezActivo.id===yo.id;
 
       if (soyJugador||soyJuez) {
+        // Soy activo — ir a vista móvil si no estoy ya ahí
         if (!document.getElementById('screen-movil').classList.contains('active')) {
           iniciarVistaMovil(soyJuez?'juez':'jugador', yo);
         }
         actualizarVistaMovil(d, soyJuez);
       } else {
-        // No soy activo — volver a espera si estaba en móvil
-        if (document.getElementById('screen-movil').classList.contains('active')) {
-          showScreen('screen-espera');
+        // No soy activo — salir de cualquier pantalla de juego/resultado y volver a espera
+        const enMovil  = document.getElementById('screen-movil').classList.contains('active');
+        const enResult = document.getElementById('screen-resultado').classList.contains('active');
+        if (enMovil || enResult) showScreen('screen-espera');
+
+        // Mensaje según situación
+        const msg = document.getElementById('espera-turno-msg');
+        msg.style.display = 'block';
+
+        // currentTeam: 0 = equipo A describe, 1 = equipo B describe
+        const miEquipo = yo.equipo; // 0 = A, 1 = B
+        const equipoDescribe = d.currentTeam; // 0 o 1
+
+        if (miEquipo === equipoDescribe) {
+          // Mi equipo está describiendo/adivinando
+          msg.textContent = '🧠 ¡Tu equipo está adivinando! Escuchá y ayudá a adivinar.';
+        } else {
+          // Mi equipo está juzgando pero no soy el juez
+          msg.textContent = '⏳ Tu equipo es juez esta ronda. Esperá tu turno.';
         }
-        const msg=document.getElementById('espera-turno-msg');
-        msg.style.display='block';
-        msg.textContent='⏳ Esperando tu turno...';
       }
     }
   });
