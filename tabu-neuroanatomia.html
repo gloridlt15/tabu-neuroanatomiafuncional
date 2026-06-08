@@ -665,8 +665,7 @@ document.getElementById('btn-iniciar-juego').addEventListener('click', () => {
 
 // Jugador espera inicio - listener unificado que maneja todos los estados
 function escucharInicioJuego() {
-  let yaEnVistaMovil = false;
-  let mobileApplyFn = null; // función apply de la vista móvil
+  let mobileApplyFn = null; // función apply de la vista móvil, null = no activo
 
   refGame.on('value', snap => {
     const d = snap.val();
@@ -674,50 +673,47 @@ function escucharInicioJuego() {
     const yo = JSON.parse(sessionStorage.getItem('tabu_jugador') || 'null');
     if (!yo) return;
 
-    // Si ya tenemos la función apply de la vista móvil, usarla directamente
-    if (mobileApplyFn) {
-      mobileApplyFn(d);
-      return;
-    }
-
-    if (d.phase === 'resultado') {
-      mostrarResultadoJugadorMovil(d);
-      return;
-    }
-
+    // Pantalla final
     if (d.phase === 'final') {
-      mostrarFinal(d);
+      mobileApplyFn = null;
+      mostrarFinalJugador(d, yo);
       return;
     }
 
+    // Pantalla resultado entre rondas
+    if (d.phase === 'resultado') {
+      // Resetear siempre al llegar a resultado
+      mobileApplyFn = null;
+      mostrarResultadoJugadorMovil(d, yo);
+      return;
+    }
+
+    // Fases de juego
     if (d.phase === 'playing' || d.phase === 'idle' || d.phase === 'ended') {
-      // Revisar si este jugador es el activo
       const soyJugador = d.jugadorActivo && d.jugadorActivo.id === yo.id;
       const soyJuez    = d.juezActivo    && d.juezActivo.id    === yo.id;
+      const soyActivo  = soyJugador || soyJuez;
 
-      if (soyJugador || soyJuez) {
-        if (!yaEnVistaMovil) {
-          yaEnVistaMovil = true;
-          // iniciarVistaMovil devuelve la función apply para uso futuro
+      if (soyActivo) {
+        // Soy el activo — iniciar o actualizar vista móvil
+        if (!mobileApplyFn) {
+          // Primera vez que soy activo en este turno
           mobileApplyFn = iniciarVistaMovil(soyJuez ? 'juez' : 'jugador', yo);
-          mobileApplyFn(d);
         }
+        mobileApplyFn(d);
       } else {
-        // No es el activo en este turno
-        if (document.getElementById('screen-espera').classList.contains('active')) {
-          const msg = document.getElementById('espera-turno-msg');
-          msg.style.display = 'block';
-          msg.textContent = '⏳ Esperando tu turno...';
-        }
-        // Si estaba en vista móvil y ya no es activo, volver a espera
-        if (yaEnVistaMovil) {
-          yaEnVistaMovil = false;
+        // NO soy el activo — asegurarme de estar en pantalla de espera
+        if (mobileApplyFn) {
+          // Estaba activo antes, resetear
           mobileApplyFn = null;
-          showScreen('screen-espera');
-          const msg = document.getElementById('espera-turno-msg');
-          msg.style.display = 'block';
-          msg.textContent = '⏳ Esperando tu próximo turno...';
         }
+        // Mostrar pantalla de espera
+        if (!document.getElementById('screen-espera').classList.contains('active')) {
+          showScreen('screen-espera');
+        }
+        const msg = document.getElementById('espera-turno-msg');
+        msg.style.display = 'block';
+        msg.textContent = '⏳ Esperando tu turno...';
       }
     }
   });
@@ -1181,8 +1177,7 @@ function escucharAccionesJuez() {
 // ================================================
 // RESULTADO JUGADOR (vista móvil/espera)
 // ================================================
-function mostrarResultadoJugadorMovil(d) {
-  // Mostrar pantalla de resultado también en móviles
+function mostrarResultadoJugadorMovil(d, yo) {
   showScreen('screen-resultado');
   document.getElementById('res-title').textContent = `Fin de la ronda ${d.round}`;
   document.getElementById('res-nom-a').textContent = d.names[0];
@@ -1191,10 +1186,32 @@ function mostrarResultadoJugadorMovil(d) {
   document.getElementById('res-pts-b').textContent = d.scores[1];
   document.getElementById('res-par').textContent = d.jugadorActivo && d.juezActivo
     ? `Jugaron: ${d.jugadorActivo.nombre} y ${d.juezActivo.nombre}` : '';
-  document.getElementById('res-sub').textContent = d.hayMasRondas ? 'Quedan más rondas' : '¡Última ronda!';
-  // Ocultar botones en móvil (solo coordinador avanza)
+  document.getElementById('res-sub').textContent = d.hayMasRondas ? 'Quedan más rondas por jugar' : '¡Última ronda!';
+  // Ocultar botones — solo coordinador avanza
   document.getElementById('btn-siguiente-ronda').style.display = 'none';
   document.getElementById('btn-terminar-juego').style.display = 'none';
+}
+
+function mostrarFinalJugador(d, yo) {
+  showScreen('screen-final');
+  const tied   = d.scores[0] === d.scores[1];
+  const winner = d.scores[0] > d.scores[1] ? 0 : 1;
+  const miEquipo = yo ? yo.equipo : -1;
+
+  let msg = '';
+  if (tied) {
+    msg = '🤝 ¡Empate!';
+  } else if (miEquipo === winner) {
+    msg = `🏆 ¡Tu equipo ganó, ${yo ? yo.nombre : ''}!`;
+  } else {
+    msg = `😔 Esta vez no fue, ${yo ? yo.nombre : ''}. ¡La próxima!`;
+  }
+  document.getElementById('final-winner').textContent = msg;
+  document.getElementById('final-scores').innerHTML = d.names.map((n,i) => {
+    const win = !tied && i===winner;
+    return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${n}</div><div class="fs-pts">${d.scores[i]}</div><div style="font-size:.72rem;opacity:.7">puntos</div></div>`;
+  }).join('');
+  if (!tied && miEquipo === winner) setTimeout(confetti, 300);
 }
 
 // ================================================
@@ -1210,7 +1227,13 @@ function mostrarFinal(d) {
     return `<div class="fs-card ${win?'winner':'loser'}"><div style="font-size:2rem">${win?'👑':'🏅'}</div><div class="fs-name">${n}</div><div class="fs-pts">${datos.scores[i]}</div><div style="font-size:.72rem;opacity:.7">puntos</div></div>`;
   }).join('');
 
-  refGame.update({ phase:'final', scores:datos.scores, names:datos.names });
+  // Publicar fase final para que todos los celulares la reciban
+  refGame.set({
+    phase: 'final',
+    scores: datos.scores,
+    names: datos.names,
+    ts: Date.now(),
+  });
   showScreen('screen-final');
   setTimeout(confetti, 300);
 }
