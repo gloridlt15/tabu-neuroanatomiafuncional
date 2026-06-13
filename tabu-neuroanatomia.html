@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TABÚ Neuroanatomía</title>
+<title>S.O.S Brocca: Palabras Prohibidas</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Righteous&display=swap');
 :root {
@@ -247,7 +247,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <!-- ===== BIENVENIDA ===== -->
 <div id="screen-bienvenida" class="screen center-screen active">
-  <div><div class="brain">🧠</div><div class="logo-title">TABÚ</div><div class="logo-sub">Neuroanatomía</div></div>
+  <div><div class="brain">🧠</div><div class="logo-title">S.O.S BROCCA</div><div class="logo-sub">Palabras Prohibidas</div></div>
   <div class="glass-card" style="width:100%;max-width:360px">
     <div class="card-title">👋 ¿Con qué rol entrás?</div>
     <button class="btn-role" onclick="elegirRol('coordinador')">
@@ -273,7 +273,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <!-- ===== SETUP ===== -->
 <div id="screen-setup" class="screen center-screen">
-  <div><div class="brain">🧠</div><div class="logo-title" style="font-size:3rem">TABÚ</div></div>
+  <div><div class="brain">🧠</div><div class="logo-title" style="font-size:3rem">S.O.S BROCCA</div></div>
   <div class="setup-card">
     <div class="card-title">⚙️ Configurar partida</div>
     <div class="upload-zone" id="upload-zone">
@@ -289,8 +289,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
     <label class="field-label">🏆 Nombre de equipos</label>
     <div style="display:flex;gap:.8rem;margin-bottom:1.2rem">
-      <div style="flex:1"><input type="text" id="nombre-a" class="input" placeholder="Azules" maxlength="12" style="border-color:rgba(36,96,184,.5)"></div>
-      <div style="flex:1"><input type="text" id="nombre-b" class="input" placeholder="Rojos" maxlength="12" style="border-color:rgba(184,36,36,.5)"></div>
+      <div style="flex:1"><input type="text" id="nombre-a" class="input" placeholder="Elefantes" maxlength="12" style="border-color:rgba(36,96,184,.5)"></div>
+      <div style="flex:1"><input type="text" id="nombre-b" class="input" placeholder="Jinetes" maxlength="12" style="border-color:rgba(184,36,36,.5)"></div>
     </div>
     <button class="btn btn-primary" id="btn-ir-lobby">👥 Abrir sala de espera</button>
   </div>
@@ -298,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <!-- ===== LOBBY (coordinador ve jugadores) ===== -->
 <div id="screen-lobby-coord" class="screen center-screen">
-  <div><div class="logo-title" style="font-size:2.5rem">🧠 TABÚ</div><div class="logo-sub">Sala de espera</div></div>
+  <div><div class="logo-title" style="font-size:2.5rem">🧠 S.O.S BROCCA</div><div class="logo-sub">Sala de espera</div></div>
   <div class="equipos-wrap" id="lobby-equipos"></div>
   <div style="color:rgba(255,255,255,.5);font-size:.82rem;font-weight:600">Los jugadores se unen desde sus celulares</div>
   <button class="btn btn-primary" id="btn-iniciar-juego" disabled style="max-width:360px">🚀 Iniciar juego</button>
@@ -307,7 +307,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <!-- ===== LOBBY (jugador se anota) ===== -->
 <div id="screen-lobby" class="screen center-screen">
-  <div><div class="brain">🧠</div><div class="logo-title" style="font-size:2.5rem">TABÚ</div></div>
+  <div><div class="brain">🧠</div><div class="logo-title" style="font-size:2.5rem">S.O.S BROCCA</div></div>
   <div class="lobby-join glass-card">
     <h2>✍️ Anotate para jugar</h2>
     <label class="field-label">Tu nombre</label>
@@ -336,8 +336,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="panel-pub">
     <div class="confetti-area" id="confetti-area"></div>
     <div class="scoreboard">
-      <div class="score-box azul" id="score-a"><div class="score-name" id="pub-nom-a">AZULES</div><div class="score-pts" id="pub-pts-a">0</div></div>
-      <div class="score-box rojo" id="score-b"><div class="score-name" id="pub-nom-b">ROJOS</div><div class="score-pts" id="pub-pts-b">0</div></div>
+      <div class="score-box azul" id="score-a"><div class="score-name" id="pub-nom-a">ELEFANTES</div><div class="score-pts" id="pub-pts-a">0</div></div>
+      <div class="score-box rojo" id="score-b"><div class="score-name" id="pub-nom-b">JINETES</div><div class="score-pts" id="pub-pts-b">0</div></div>
     </div>
     <div class="timer-wrap">
       <svg class="timer-svg" viewBox="0 0 160 160">
@@ -406,8 +406,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="resultado-title" id="res-title">Fin de la ronda</div>
     <div class="resultado-sub" id="res-sub"></div>
     <div class="rm-scores">
-      <div class="rm-box a"><div class="rm-name" id="res-nom-a">AZULES</div><div class="rm-pts" id="res-pts-a">0</div></div>
-      <div class="rm-box b"><div class="rm-name" id="res-nom-b">ROJOS</div><div class="rm-pts" id="res-pts-b">0</div></div>
+      <div class="rm-box a"><div class="rm-name" id="res-nom-a">ELEFANTES</div><div class="rm-pts" id="res-pts-a">0</div></div>
+      <div class="rm-box b"><div class="rm-name" id="res-nom-b">JINETES</div><div class="rm-pts" id="res-pts-b">0</div></div>
     </div>
     <div class="par-jugado" id="res-par"></div>
     <button class="btn btn-primary" id="btn-siguiente-ronda" style="margin-bottom:.7rem">▶ Siguiente ronda</button>
@@ -479,7 +479,7 @@ const G = {
   cards:[], deck:[], deckIdx:0, currentCardIdx:-1,
   timerSecs:45, timerLeft:45, timerInterval:null,
   running:false, paused:false,
-  teams:[{name:'AZULES',score:0},{name:'ROJOS',score:0}],
+  teams:[{name:'ELEFANTES',score:0},{name:'JINETES',score:0}],
   round:1,
   // Turno dentro de la ronda: 0 = E1 juzga / E2 describe; 1 = E1 describe / E2 juzga
   turnWithinRound:0,
@@ -551,8 +551,8 @@ function loadFiles(files){
 document.querySelectorAll('.timer-btn').forEach(b=>{
   b.addEventListener('click',()=>{document.querySelectorAll('.timer-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');G.timerSecs=parseInt(b.dataset.s);});
 });
-document.getElementById('nombre-a').addEventListener('input',e=>{G.teams[0].name=e.target.value.trim().toUpperCase()||'AZULES';actualizarLabelsLobby();});
-document.getElementById('nombre-b').addEventListener('input',e=>{G.teams[1].name=e.target.value.trim().toUpperCase()||'ROJOS';actualizarLabelsLobby();});
+document.getElementById('nombre-a').addEventListener('input',e=>{G.teams[0].name=e.target.value.trim().toUpperCase()||'ELEFANTES';actualizarLabelsLobby();});
+document.getElementById('nombre-b').addEventListener('input',e=>{G.teams[1].name=e.target.value.trim().toUpperCase()||'JINETES';actualizarLabelsLobby();});
 
 document.getElementById('btn-ir-lobby').addEventListener('click',()=>{
   if(G.cards.length===0)G.cards=CARTAS_EMBEBIDAS;
